@@ -1,0 +1,84 @@
+package com.onethefull.recipe.vo;
+
+import java.util.List;
+
+public class AiRecipeDetailVO {
+	String userId;
+	String recipeId;
+	String recipeName;
+	String recipeType;
+	String cookingTime;
+	String cookDifficulty;
+	String imageUrl;
+	List<CookingStep> cookingStep;
+	
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getRecipeId() {
+		return recipeId;
+	}
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+	public String getRecipeName() {
+		return recipeName;
+	}
+	public void setRecipeName(String recipeName) {
+		this.recipeName = recipeName;
+	}
+	public String getRecipeType() {
+		return recipeType;
+	}
+	public void setRecipeType(String recipeType) {
+		this.recipeType = recipeType;
+	}
+	public String getCookingTime() {
+		return cookingTime;
+	}
+	public void setCookingTime(String cookingTime) {
+		this.cookingTime = cookingTime;
+	}
+	public String getDifficulty() {
+		return cookDifficulty;
+	}
+	public void setDifficulty(String cookingDifficulty) {
+		this.cookDifficulty = cookingDifficulty;
+	}
+	public List<CookingStep> getCookingStep() {
+		return cookingStep;
+	}
+	public void setCookingStep(List<CookingStep> cookingStep) {
+		this.cookingStep = cookingStep;
+	}
+	
+	public AiRecipeDetailVO() {}
+	
+	public AiRecipeDetailVO(String userId, String recipeId, String recipeName, String recipeType, String imageUrl,
+			String cookingTime, String cookingDifficulty, List<CookingStep> cookingStep) {
+		super();
+		this.userId = userId;
+		this.recipeId = recipeId;
+		this.setRecipeName(recipeName);
+		this.recipeType = recipeType;
+		this.setImageUrl(imageUrl);
+		this.cookingTime = cookingTime;
+		this.cookDifficulty = cookingDifficulty;
+		this.cookingStep = cookingStep;
+	}
+	public String getCookDifficulty() {
+		return cookDifficulty;
+	}
+	public void setCookDifficulty(String cookDifficulty) {
+		this.cookDifficulty = cookDifficulty;
+	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+}

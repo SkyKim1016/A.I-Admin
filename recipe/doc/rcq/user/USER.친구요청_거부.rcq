@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:8080/recipe/rapi/friendship/request/reject</URL><method>POST</method><headers><header key="auth_token" value="6d1f16d629c08a12e996d471ca4440d9fb3c91a4b08dc79c87f03b433ba6c12d"/></headers><body><string content-type="application/json" charset="UTF-8">{"userId":"20160520210850"}</string></body></request></rest-client>

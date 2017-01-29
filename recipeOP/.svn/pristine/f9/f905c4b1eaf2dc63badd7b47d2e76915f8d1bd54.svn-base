@@ -1,0 +1,13 @@
+#product
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://104.199.170.76:3306/recipe_proto?useUnicode=true&characterEncoding=UTF8
+jdbc.username=opdb
+jdbc.password=041@
+
+#developer
+#jdbc.driver=net.sf.log4jdbc.DriverSpy
+#jdbc.url=jdbc:log4jdbc:mysql://104.199.170.76:3306/recipe_proto?useUnicode=true&characterEncoding=UTF8
+##jdbc.url=jdbc:log4jdbc:mysql://104.199.170.76:3306/recipe_proto
+#jdbc.username=opdb
+#jdbc.password=041@
+

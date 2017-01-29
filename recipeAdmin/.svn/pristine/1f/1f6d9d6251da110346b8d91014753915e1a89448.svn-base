@@ -1,0 +1,5 @@
+nodejs backround running(daemon)
+nohup forever server.js &
+
+실행 명령어
+node service 정지 : forever stop 0

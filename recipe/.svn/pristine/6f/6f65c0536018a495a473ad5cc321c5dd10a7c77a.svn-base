@@ -1,0 +1,37 @@
+package com.onethefull.recipe.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.req.RecipeReq;
+import com.onethefull.recipe.service.RecipeService;
+
+@Controller
+@RequestMapping("/rapi/recipe")
+public class RecipeController {
+
+	@Resource(name = "recipeService")
+	private RecipeService recipeService;
+
+	@RequestMapping(value = "/{recipeId}", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getUserStuffOwningList(@PathVariable String recipeId, HttpServletRequest request,
+			@RequestBody RecipeReq req) {
+		req.setRecipeId(recipeId);
+		return recipeService.getRecipeDetail(req);
+	}
+
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getFridgeIngr(HttpServletRequest request, @RequestBody RecipeReq req) {
+		return recipeService.getFridgeIngr(req);
+	}
+}

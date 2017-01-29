@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:8080/recipe/rapi/friendship/friend/list</URL><method>POST</method><headers><header key="auth_token" value="5e83d6cc070d2119db76a506894e1d562518052cdd0ffd889513ada42571cf38"/></headers><body><string content-type="application/json" charset="UTF-8">{}</string></body></request></rest-client>

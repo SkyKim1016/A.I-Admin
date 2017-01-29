@@ -1,0 +1,83 @@
+package com.onethefull.recipe.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.mapper.RecipeMapper;
+import com.onethefull.recipe.req.RecipeReq;
+import com.onethefull.recipe.res.FridgeIngr;
+import com.onethefull.recipe.res.RecipeDetail;
+import com.onethefull.recipe.res.RecipeDetailNutrient;
+import com.onethefull.recipe.res.RecipeDetailProcess;
+import com.onethefull.recipe.res.RecipeDetailStuff;
+import com.onethefull.recipe.vo.FridgeIngrVO;
+import com.onethefull.recipe.vo.RecipeIngrVOwithDday;
+import com.onethefull.recipe.vo.RecipeMasterVO;
+
+@Service("recipeService")
+public class RecipeService {
+	
+	@Value("#{serverProperty['domain.url']}")
+	private String domainUrl;	
+	
+	@Resource(name = "recipeMapper")
+	private RecipeMapper recipeMapper;
+	
+	public ResultWithData getRecipeDetail(RecipeReq req) {
+		
+		RecipeMasterVO recipevo = recipeMapper.getRecipeDetailMaster(req);
+		List<RecipeDetailStuff> stuffs = recipeMapper.getRecipeStuffs(req);
+		List<RecipeDetailNutrient> nutrients = recipeMapper.getRecipeNutrients(req);
+		List<RecipeDetailProcess> processes = recipeMapper.getRecipeProcesses(req);
+		
+		RecipeDetail recipeDetail = new RecipeDetail();
+		recipeDetail.setRecipeId(recipevo.getRecipeId());
+		recipeDetail.setRecipeName(recipevo.getRecipeName());
+		recipeDetail.setCategoryId(recipevo.getCategoryId());
+		recipeDetail.setCategoryName(recipevo.getCategoryName());
+		recipeDetail.setCookDifficulty(recipevo.getCookDifficulty());
+		recipeDetail.setCookingTime(String.valueOf(recipevo.getCookingTime()) + "분");
+		recipeDetail.setImageUrl(recipevo.getImageUrl());
+		recipeDetail.setReferedUrl(recipevo.getReferedUrl());
+		recipeDetail.setCalorie(recipevo.getCalorie());
+		recipeDetail.setMemo(recipevo.getMemo());
+		recipeDetail.setStorageInfo(recipevo.getStorageInfo());
+
+		recipeDetail.setNutrients(nutrients);
+		recipeDetail.setStuffs(stuffs);
+		recipeDetail.setProcesses(processes);
+		
+		return ResultWithData.succcessResult().addData("recipe", recipeDetail);
+	}
+	
+	public ResultWithData getFridgeIngr(RecipeReq req) {
+
+		List<FridgeIngr> friIngrList = new ArrayList<FridgeIngr>();
+		List<FridgeIngrVO> FridgeIngrList = recipeMapper.getFridgeIngr(req);
+		if(FridgeIngrList != null && !FridgeIngrList.isEmpty()) {
+		
+			for(FridgeIngrVO vo : FridgeIngrList) {
+				
+				String imageurl = vo.getIngredientImageUrl();
+				if(imageurl != null && !imageurl.isEmpty()) {
+					imageurl = this.domainUrl + imageurl;
+				} else if(vo.getIngrCategoryImageUrl() != null) {
+					imageurl = this.domainUrl + vo.getIngrCategoryImageUrl();
+				}
+				
+				friIngrList.add(new FridgeIngr(vo.getIngrCategoryId(), vo.getIngrCategoryName(), 
+						new RecipeIngrVOwithDday(vo.getIngredientId(), vo.getIngredientName(), vo.getIngredientQnt(), vo.getIngredientDday(), imageurl)));
+			}
+		}
+
+		return ResultWithData.succcessResult().addData("list", friIngrList);
+	}
+	
+
+}

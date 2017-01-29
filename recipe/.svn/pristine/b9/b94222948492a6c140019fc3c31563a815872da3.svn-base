@@ -1,0 +1,5 @@
+recipe dev info :
+JDK : 1.7
+TOMCAT : 8.0
+DB : MYSQL 6.2
+Spring Framework : 4.1.6

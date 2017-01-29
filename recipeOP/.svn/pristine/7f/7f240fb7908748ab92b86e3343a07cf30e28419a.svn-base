@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.RecipeMapper">
+	<select id="getRecipeDetailMaster" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeMasterVO">  
+	
+		select r.id as recipeId, r.id_category as categoryId, r.name as recipeName, r.cook_time as cookingTime, 
+			r.calorie, ifnull(r.image_original_url, r.image_url) as imageUrl, ifnull(r.image_original_url, r.image_url) as imageOriginalUrl, 
+			ifnull(r.image_thumb_url, r.image_url) as imageThumbUrl, r.refered_url as referedUrl, 
+			r.storage_info as storageInfo, r.memo, ifnull(r.cook_difficulty, 3) as cookDifficulty, r.count_view as countView ,
+			r.group1 * r.group2 as healthLevel, r.is_ai as isAIRecipe,  
+			case when sim.sim  <![CDATA[>]]>  sim.sim_h or ( r.group1 * r.group2 <![CDATA[<]]> h.content_int  and r.group2 <![CDATA[<]]> 4 ) then 1 else 0 end as isRcmdbyHeath,
+			case when sim.sim  <![CDATA[>]]>   b.content_var then 1 else 0 end as isTaste,
+			case when r.count_view  <![CDATA[>]]>  a.content_int then 1 else 0 end as isPopular
+		from mst_recipe r
+		left join tbl_user_recipe_sim sim on r.id = sim.id_recipe and sim.id_user = #{userId}
+		left join mst_admin_operation a on a.id = 'VIEWCOUNT'
+		left join mst_admin_operation b on b.id = 'TASTELEVEL'
+		left join mst_admin_operation h on h.id = 'HEALTHLEVEL'
+		where r.id = #{recipeId} 
+				
+
+	</select>
+	
+	<select id="getRecipeStuffs" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeIngrVOwithDday">  
+
+        select a.ingredientId, s.name as ingredientName, a.ingredientQnt, a.ingredientDday, 
+        	   c.id AS ingrCategoryId, c.name AS ingrCategoryName,
+        	   c.image_url AS ingrCategoryImageUrl, s.image_url AS ingredientImageUrl,
+			   datediff(ingredientDday, now()) as ingredientDday,
+			   CASE
+					WHEN datediff(ingredientDday, now()) <![CDATA[<]]> 0
+					THEN 'EXPIRED'
+					WHEN datediff(ingredientDday, now()) <![CDATA[<=]]> 1
+					THEN 'DANGER'
+					WHEN datediff(ingredientDday, now()) <![CDATA[<=]]> 3
+					THEN 'WARNING'
+					ELSE 'NORMAL'
+			   END as expStatus
+        from (
+			select m.id_stuff as ingredientId, m.quantity_info as ingredientQnt, min(h.expiration_date) as ingredientDday,
+			h.id_user as userId
+			from mst_recipe_stuff m
+			left join mst_user_stuff_having h on m.id_stuff = h.id_stuff and h.id_user = #{userId}
+			where m.id_recipe = #{recipeId}
+			group by ingredientId, ingredientQnt
+		) a
+		join mst_stuff s on a.ingredientId = s.id
+		LEFT JOIN mst_category_stuff c ON s.id_category = c.id;
+		
+	</select>
+
+	<select id="getRecipeNutrients" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailNutrient">  
+
+		select m.id_nutrient as nutrientId, n.name as stuffName, m.quantity_info as quantityInfo
+		from mst_recipe_nutrient m
+		join mst_nutrient n on m.id_nutrient = n.id
+		where id_recipe = #{recipeId}
+
+	</select>
+
+	<select id="getRecipeProcesses" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailProcess">  
+
+		select seq, process_info as description
+		from mst_recipe_process
+		where id_recipe = #{recipeId}
+		order by seq;
+
+	</select>
+	
+	<select id="getFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" resultType="com.onethefull.recipe.vo.FridgeIngrVO">
+	<!-- 
+		SELECT id_stuff AS ingredientId, sum(h.qty) as qty, h.unit, min(h.expiration_date) AS expirationDate,
+    		   s.name AS ingredientName, s.id_category AS ingrCategoryId, c.name AS ingrCategoryName,
+    		   c.image_url AS ingrCategoryImageUrl, s.expiration_term AS ingredientDday, s.image_url AS ingredientImageUrl,
+    		   CASE
+					WHEN datediff(h.expiration_date, now()) <![CDATA[<]]> 0
+			        THEN 'EXPIRED'
+					WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 1
+			        THEN 'DANGER'
+			        WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 3
+			        THEN 'WARNING'
+			        ELSE 'NORMAL'
+			   END as expStatus
+		FROM mst_user_stuff_having h JOIN mst_stuff s ON h.id_stuff = s.id
+        LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		WHERE h.id_user = #{userId}
+		GROUP BY id_stuff, s.name, s.id_category, c.name, c.image_url, s.expiration_term, h.unit, s.image_url
+		ORDER BY ingrCategoryName , ingredientName
+	-->
+		SELECT id_stuff AS ingredientId, qty, h.unit, h.expiration_date AS expirationDate,
+   		   s.name AS ingredientName, s.id_category AS ingrCategoryId, c.name AS ingrCategoryName,
+   		   c.image_url AS ingrCategoryImageUrl, s.image_url AS ingredientImageUrl,
+   		   datediff(h.expiration_date, now()) as ingredientDday,
+   		   CASE
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<]]> 0
+		        THEN 'EXPIRED'
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 1
+		        THEN 'DANGER'
+		        WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 3
+		        THEN 'WARNING'
+		        ELSE 'NORMAL'
+		   END as expStatus
+		FROM mst_user_stuff_having h JOIN mst_stuff s ON h.id_stuff = s.id
+        LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		WHERE h.id_user = #{userId}
+		ORDER BY ingredientName, expirationDate
+	</select>
+	
+	<update id="updateFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" statementType="CALLABLE">
+		{ CALL sp_user_stuff_having_master(#{userId}, #{ingredientName}, #{ingredientQnt}, null, #{ingredientDday}, #{type.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<select id="getCheckFavoriteRecipeList" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeforFavoriteCheckVO">  
+
+		<if test="userId !=null and userId != ''">
+			select a.id, a.name, m.priority
+			from mst_user_favorite_check_recipe_list m
+			join mst_favorite_check_recipe_list a on m.id_check = a.id and a.status = 'A'
+			where m.id_user = #{userId}
+			order by m.priority
+			
+		</if>
+		<if test="userId ==null or userId == ''">
+			select id, name ,priority
+			from (
+			  select id, name, 1 as priority 
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 1 and group2 = 1
+			 -- and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			
+			  union all
+        
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 1 and group2 = 3
+			 -- and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			
+			  union all        
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 1 and group2 = 5
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+		  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 3 and group2 = 1
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 3 and group2 = 3
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 3 and group2 = 5
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a        
+        
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 5 and group2 = 1
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 5 and group2 = 3
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+			  union all
+			
+			  select id, name, 1 as priority
+			  from (
+			  select id, name, priority
+			  from mst_favorite_check_recipe_list
+			  where group1 = 5 and group2 = 5
+			--  and status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+        
+			) a
+			order by priority desc, rand()
+      		limit 0, 5
+
+		</if>
+		
+	</select>	
+	
+	
+	<update id="increaseViewCount" parameterType="com.onethefull.recipe.req.RecipeReq">
+		UPDATE mst_recipe
+		SET	count_view = count_view + 1
+		WHERE `id` = #{recipeId};
+	
+	</update>	
+	
+</mapper>

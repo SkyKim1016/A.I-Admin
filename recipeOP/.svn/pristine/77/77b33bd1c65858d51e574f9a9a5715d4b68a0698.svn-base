@@ -1,0 +1,5 @@
+mail.host=smtp.worksmobile.com
+mail.port=465
+mail.username=sjkim@1thefull.com
+mail.password=rlatjdwns1
+mail.encoding=UTF-8

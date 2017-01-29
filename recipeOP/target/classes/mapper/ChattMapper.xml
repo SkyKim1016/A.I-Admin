@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.ChattMapper">
+	
+	<select id="getChattListPageInfo" parameterType="com.onethefull.recipe.req.ChattReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(uc.id) as itemSize,  ceiling(count(uc.id) * 1.0 / ${pageSize}) as lastPageNum  
+		  FROM mst_user_chatt uc
+		  JOIN mst_chatt c ON c.id = uc.id_chatt
+		 WHERE uc.id_user = #{userId}
+	</select>
+	
+	<select id="getChattList" parameterType="com.onethefull.recipe.req.ChattReq" resultType="com.onethefull.recipe.vo.ChattVO">
+		SELECT uc.id, uc.create_date as createDate, uc.status, uc.count_person as countPerson
+		  FROM mst_user_chatt uc
+		  JOIN mst_chatt c ON c.id = uc.id_chatt
+		 WHERE uc.id_user = #{userId}
+		 ORDER BY uc.create_date DESC
+		 LIMIT ${startNum}, ${pageSize}
+	</select>	
+
+	<select id="getChattMessageListPageInfo" parameterType="com.onethefull.recipe.req.ChattReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(ucm.id_chatt) as itemSize,  ceiling(count(ucm.id_chatt) * 1.0 / ${pageSize}) as lastPageNum  
+		  FROM tbl_chatt_message ucm
+		  JOIN mst_chatt c ON c.id = ucm.id_chatt
+		 WHERE ucm.id_chatt = #{id}
+	</select>
+
+	<select id="getChattMessageList" parameterType="com.onethefull.recipe.req.ChattReq" resultType="com.onethefull.recipe.vo.ChattMessageVO">
+		SELECT ucm.id_chatt as chattId, ucm.message, ucm.create_date as createDate, ucm.count_read as countRead
+		  FROM tbl_chatt_message ucm
+		  JOIN mst_chatt c ON c.id = ucm.id_chatt
+		 WHERE ucm.id_chatt = #{id}
+		 ORDER BY ucm.create_date DESC
+		 LIMIT ${startNum}, ${pageSize}
+	</select>
+
+	<update id="sendChattMessage" parameterType="com.onethefull.recipe.req.ChattReq" statementType="CALLABLE">  
+		{ CALL sp_chatt_send_master(#{id}, #{userId}, #{receiveUserId}, #{message}, #{type.code}, #{countRead, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+
+	<update id="exitChatt" parameterType="com.onethefull.recipe.req.ChattReq" statementType="CALLABLE">  
+		{ CALL sp_chatt_manage_master(#{id}, #{userId}, null, #{type.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+</mapper>

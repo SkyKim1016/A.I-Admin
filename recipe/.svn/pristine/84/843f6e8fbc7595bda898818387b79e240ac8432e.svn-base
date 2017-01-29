@@ -1,0 +1,71 @@
+package com.onethefull.recipe.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.comm.service.UserService;
+import com.onethefull.recipe.comm.social.UserSocialConnection;
+import com.onethefull.recipe.req.ModifyFavoriteStep1Req;
+import com.onethefull.recipe.req.RecipeReq;
+
+@Controller
+@RequestMapping("/rapi/user")
+public class UserController extends BaseController {
+
+	private final static Logger logger = LoggerFactory.getLogger(UserController.class);
+	
+	@Resource(name = "userService")
+	private UserService userService;
+	
+	@RequestMapping(value = "exists",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData existsUser(@RequestParam("lid") String lid) {
+		return userService.isExists(lid);
+	}
+	
+	@RequestMapping(value = "exists/social",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData existsUser(@RequestBody UserSocialConnection social) {
+		return userService.isExists(social);
+	}	
+	
+	@RequestMapping(value = "check/favorite/step1/list",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData existsUser(HttpServletRequest request) {
+		User user = this.getUser(request);
+		
+		if (user == null) {
+			user = new User();
+		}
+
+		return userService.getFavoriteCheckRecipeList(user);
+	}
+	
+	
+	@RequestMapping(value = "check/favorite/step1/modify",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData modifyFavoriteStep1(HttpServletRequest request, @RequestBody ModifyFavoriteStep1Req req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setUserId(user.getId());
+		return userService.modifyFavoriteStep1(req);
+	}	
+	
+	
+}

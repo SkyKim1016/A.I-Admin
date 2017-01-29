@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.RecipeMapper">
+	<select id="getRecipeDetailMaster" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeMasterVO">  
+		select r.id as recipeId, r.id_category as categoryId, r_l.name as recipeName, case when r.is_ai = 'Y' then '인공지능 Foody' else r_l.writer end as writer, r.writer_image_url as writerImageUrl, r.cook_time as cookingTime, 
+			r.calorie, ifnull(r.image_original_url, r.image_url) as imageUrl, ifnull(r.image_original_url, r.image_url) as imageOriginalUrl, 
+			ifnull(r.image_thumb_url, r.image_url) as imageThumbUrl, r.refered_url as referedUrl, case when r.per_person <![CDATA[>]]> 0 then r.per_person else 1 end as perPerson,
+			r_l.storage_info as storageInfo, r_l.memo, ifnull(r.cook_difficulty, 3) as cookDifficulty, r.count_view as countView ,
+			r.group1 * r.group2 as healthLevel, r.is_ai as isAIRecipe,
+			case when ( r.group1 * r.group2 <![CDATA[<]]> h.content_int  and r.group2 <![CDATA[<]]> 4 ) then 1 else 0 end as isRcmdbyHeath,
+			case when sim.sim  <![CDATA[>]]>   b.content_var then 1 else 0 end as isTaste,
+			case when r.count_view <![CDATA[>]]> a.content_int and r.count_like <![CDATA[>]]> l.content_int then 1 else 0 end as isPopular,
+			case when (sim.sim_h <![CDATA[<]]> 0) then 0 else round(sim.sim_h / 6 * 100) end as rateHealth,
+			case when (sim.sim <![CDATA[<]]> 0) then 0 else round(sim.sim / 6 * 100) end as rateTaste,
+			case when g.id_user is not null then 'Y' else 'N' end as isLike
+		from mst_recipe r
+		join mst_recipe_ln r_l on r.id = r_l.id and r_l.id_language = #{languageId}
+		left join tbl_user_recipe_sim sim on r.id = sim.id_recipe and sim.id_user = #{userId}
+		left join mst_admin_operation a on a.id = 'VIEWCOUNT'
+		left join mst_admin_operation b on b.id = 'TASTELEVEL'
+		left join mst_admin_operation h on h.id = 'HEALTHLEVEL'
+		left join mst_admin_operation l on l.id = 'LIKECOUNT'
+		left join mst_recipe_like g on g.id_recipe = r.id and g.id_user = sim.id_user
+		where r.id = #{recipeId} 
+	</select>
+	
+	<select id="getRecipeStuffs" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeIngrVOwithDday">  
+
+        select a.ingredientId, s_l.name as ingredientName, a.ingredientQnt, a.ingredientDday, 
+        	   c.id AS ingrCategoryId, c_l.name AS ingrCategoryName,
+        	   c.image_url AS ingrCategoryImageUrl, s.image_url AS ingredientImageUrl,
+			   datediff(ingredientDday, now()) as ingredientDday,
+			   CASE
+					WHEN datediff(ingredientDday, now()) <![CDATA[<]]> 0
+					THEN 'EXPIRED'
+					WHEN datediff(ingredientDday, now()) <![CDATA[<=]]> 1
+					THEN 'DANGER'
+					WHEN datediff(ingredientDday, now()) <![CDATA[<=]]> 3
+					THEN 'WARNING'
+					ELSE 'NORMAL'
+			   END as expStatus
+        from (
+			select m.id_stuff as ingredientId, m.quantity_info as ingredientQnt, min(h.expiration_date) as ingredientDday,
+			h.id_user as userId
+			from mst_recipe_stuff m
+			left join mst_user_stuff_having h on m.id_stuff = h.id_stuff and h.id_user = #{userId}
+			where m.id_recipe = #{recipeId}
+			group by ingredientId, ingredientQnt
+		) a
+		join mst_stuff s on a.ingredientId = s.id
+		join mst_stuff_ln s_l on s.id = s_l.id and s_l.id_language = #{languageId}
+		LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		left join mst_category_stuff_ln c_l on c.id = c_l.id and c_l.id_language = #{languageId}
+		
+	</select>
+
+	<select id="getRecipeNutrients" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailNutrient">  
+
+		select m.id_nutrient as nutrientId, n_l.name as stuffName, m.quantity_info as quantityInfo
+		from mst_recipe_nutrient m
+		join mst_nutrient n on m.id_nutrient = n.id
+		join mst_nutrient_ln n_l on n.id = n_l.id and n_l.id_language = #{languageId}
+		where id_recipe = #{recipeId}
+
+	</select>
+
+	<select id="getRecipeProcesses" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailProcess">  
+
+		select p.seq, p_l.process_info as description
+		from mst_recipe_process p
+		join mst_recipe_process_ln p_l on p.id = p_l.id and p_l.id_language = #{languageId}
+		where p.id_recipe = #{recipeId}
+		order by p.seq;
+
+	</select>
+	
+	<select id="getFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" resultType="com.onethefull.recipe.vo.FridgeIngrVO">
+		SELECT ingredientId, qty, unit, expirationDate, ingredientName, ingrCategoryId, ingrCategoryName,
+		    ingrCategoryImageUrl, ingredientDday, ingredientImageUrl,
+		    CASE
+				WHEN datediff(expirationDate, now()) <![CDATA[<]]> 0
+		        THEN 'EXPIRED'
+				WHEN datediff(expirationDate, now()) <![CDATA[<=]]> 1
+		        THEN 'DANGER'
+		        WHEN datediff(expirationDate, now()) <![CDATA[<=]]> 3
+		        THEN 'WARNING'
+		        ELSE 'NORMAL'
+		    END AS expStatus
+		FROM
+		    (SELECT 
+		        id_stuff AS ingredientId,
+		            SUM(h.qty) AS qty,
+		            h.unit AS unit,
+		            MAX(h.expiration_date) AS expirationDate,
+		            s_l.name AS ingredientName,
+		            s.id_category AS ingrCategoryId,
+		            c_l.name AS ingrCategoryName,
+		            c.image_url AS ingrCategoryImageUrl,
+		            s.expiration_term AS ingredientDday,
+		            s.image_url AS ingredientImageUrl
+		    FROM
+		        mst_user_stuff_having h
+		    JOIN mst_stuff s ON h.id_stuff = s.id
+		    join mst_stuff_ln s_l on s.id = s_l.id and s_l.id_language = #{languageId}
+		    LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		    left join mst_category_stuff_ln c_l on c.id = c_l.id and c_l.id_language = #{languageId}
+		    WHERE
+		        h.id_user = #{userId}
+		    GROUP BY id_stuff , s_l.name , s.id_category , c_l.name , c.image_url , s.expiration_term , h.unit , s.image_url
+		    ORDER BY ingrCategoryName , ingredientName) a;
+		<!-- 
+		SELECT id_stuff AS ingredientId, qty, h.unit, h.expiration_date AS expirationDate,
+   		   s_l.name AS ingredientName, s.id_category AS ingrCategoryId, c_l.name AS ingrCategoryName,
+   		   c.image_url AS ingrCategoryImageUrl, s.image_url AS ingredientImageUrl,
+   		   datediff(h.expiration_date, now()) as ingredientDday,
+   		   CASE
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<]]> 0
+		        THEN 'EXPIRED'
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 1
+		        THEN 'DANGER'
+		        WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 3
+		        THEN 'WARNING'
+		        ELSE 'NORMAL'
+		   END as expStatus
+		FROM mst_user_stuff_having h 
+		JOIN mst_stuff s ON h.id_stuff = s.id
+		join mst_stuff_ln s_l on s.id = s_l.id and s_l.id_language = #{languageId}
+        LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+        left join mst_category_stuff_ln c_l on c.id = c_l.id and c_l.id_language = #{languageId}
+		WHERE h.id_user = #{userId}
+		ORDER BY ingredientName, expirationDate
+		 -->
+	</select>
+	
+	<update id="updateFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" statementType="CALLABLE">
+		{ CALL sp_user_stuff_having_master(#{userId}, #{ingredientId}, #{ingredientQnt}, #{ingredientQntType.code}, #{ingredientDday}, #{type.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<select id="getCheckFavoriteRecipeList" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeforFavoriteCheckVO">  
+
+		<if test="userId !=null and userId != ''">
+			select a.id, a_l.name, m.priority
+			from mst_user_favorite_check_recipe_list m
+			join mst_favorite_check_recipe_list a on m.id_check = a.id and a.status = 'A'
+			join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			where m.id_user = #{userId}
+			order by m.priority
+			
+		</if>
+		<if test="userId ==null or userId == ''">
+			select id, name ,priority
+			from (
+			  select id, name, 1 as priority 
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 1 and a.group2 = 1
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			
+			  union all
+        
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 1 and a.group2 = 3
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			
+			  union all        
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 1 and a.group2 = 5
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+		      union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 3 and a.group2 = 1
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 3 and a.group2 = 3
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 3 and a.group2 = 5
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a        
+        
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 5 and a.group2 = 1
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+			  union all
+			
+			  select id, name, 0 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 5 and a.group2 = 3
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+			  union all
+			
+			  select id, name, 1 as priority
+			  from (
+			  select a.id, a_l.name, a.priority
+			  from mst_favorite_check_recipe_list a
+			  join mst_favorite_check_recipe_list_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId}
+			  where a.group1 = 5 and a.group2 = 5
+			 -- and a.status = 'A'
+			  order by rand()
+			  limit 0, 1
+			  ) a
+        
+        
+			) a
+			order by priority desc, rand()
+      		limit 0, 5
+
+		</if>
+		
+	</select>	
+	
+	
+	<update id="increaseViewCount" parameterType="com.onethefull.recipe.req.RecipeReq">
+		UPDATE mst_recipe
+		SET	count_view = count_view + 1
+		WHERE `id` = #{recipeId};
+	</update>
+	
+	<select id="getIngrList" parameterType="com.onethefull.recipe.comm.req.BaseReq" resultType="com.onethefull.recipe.vo.StuffVO">
+		SELECT stuff.id as stuffId, s_l.name as stuffName, stuff.id_category as stuffCategoryId, category_l.name as categoryName, ifnull(stuff.image_url, category.image_url) as stuffImageUrl 
+		FROM mst_stuff stuff
+		join mst_stuff_ln s_l on stuff.id = s_l.id and s_l.id_language = #{languageId}
+		LEFT JOIN mst_category_stuff category on stuff.id_category = category.id
+		left join mst_category_stuff_ln category_l on category.id = category_l.id and category_l.id_language = #{languageId}
+	</select>
+	
+	<select id="getIngrListforCREATE" parameterType="com.onethefull.recipe.comm.req.BaseReq" resultType="com.onethefull.recipe.vo.StuffVO">
+		SELECT stuff.id as stuffId, s_l.name as stuffName, stuff.id_category as stuffCategoryId, category_l.name as categoryName, ifnull(stuff.image_url, category.image_url) as stuffImageUrl 
+		FROM mst_stuff stuff
+		join mst_stuff_ln s_l on stuff.id = s_l.id and s_l.id_language = #{languageId}
+		LEFT JOIN mst_category_stuff category on stuff.id_category = category.id
+		left join mst_category_stuff_ln category_l on category.id = category_l.id and category_l.id_language = #{languageId}
+		where is_main = 'Y'
+		order by rand()
+		limit 0 ,100 
+	</select>
+	
+	<update id="insertRecipeLike" parameterType="com.onethefull.recipe.req.RecipeReq" statementType="CALLABLE">
+		{ CALL sp_user_like_recipe_master(#{recipeId}, #{userId}, 'Y', #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<update id="deleteRecipeLike" parameterType="com.onethefull.recipe.req.RecipeReq" statementType="CALLABLE">
+		{ CALL sp_user_like_recipe_master(#{recipeId}, #{userId}, 'N', #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+</mapper>

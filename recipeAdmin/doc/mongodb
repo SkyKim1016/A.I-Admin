@@ -1,0 +1,3 @@
+mongodb backround running(daemon)
+
+mongod --fork --logpath /var/log/mongodb/mongod.log --logappend --dbpath /var/lib/mongodb --bind_ip 127.0.0.1

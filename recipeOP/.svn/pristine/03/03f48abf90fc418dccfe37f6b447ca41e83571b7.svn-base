@@ -1,0 +1,99 @@
+package com.onethefull.recipe.vo;
+
+import java.math.BigDecimal;
+
+public class RcmdRecipeVO {
+	private String recipeId;
+	private String recipeName;
+	private String categoryName;
+	private String imageUrl;
+	private BigDecimal nutrientQty1;
+	private BigDecimal nutrientQty2;
+	private String nutrientMeasure1;
+	private String nutrientMeasure2;
+	
+
+	public RcmdRecipeVO() {}
+
+
+	public String getRecipeId() {
+		return recipeId;
+	}
+
+
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+
+
+	public String getRecipeName() {
+		return recipeName;
+	}
+
+
+	public void setRecipeName(String recipeName) {
+		this.recipeName = recipeName;
+	}
+
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+
+	public BigDecimal getNutrientQty1() {
+		return nutrientQty1;
+	}
+
+
+	public void setNutrientQty1(BigDecimal nutrientQty1) {
+		this.nutrientQty1 = nutrientQty1;
+	}
+
+
+	public BigDecimal getNutrientQty2() {
+		return nutrientQty2;
+	}
+
+
+	public void setNutrientQty2(BigDecimal nutrientQty2) {
+		this.nutrientQty2 = nutrientQty2;
+	}
+
+
+	public String getNutrientMeasure1() {
+		return nutrientMeasure1;
+	}
+
+
+	public void setNutrientMeasure1(String nutrientMeasure1) {
+		this.nutrientMeasure1 = nutrientMeasure1;
+	}
+
+
+	public String getNutrientMeasure2() {
+		return nutrientMeasure2;
+	}
+
+
+	public void setNutrientMeasure2(String nutrientMeasure2) {
+		this.nutrientMeasure2 = nutrientMeasure2;
+	}
+	
+
+}

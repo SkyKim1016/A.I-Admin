@@ -1,0 +1,295 @@
+package com.onethefull.recipe.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.req.AscDescType;
+import com.onethefull.recipe.comm.req.SearchFilterReq;
+import com.onethefull.recipe.comm.req.SearchFilterType;
+import com.onethefull.recipe.comm.req.SearchFilterUnitReq;
+import com.onethefull.recipe.comm.req.SearchSortReq;
+import com.onethefull.recipe.comm.req.SearchSortType;
+import com.onethefull.recipe.comm.req.SearchSortUnitReq;
+import com.onethefull.recipe.comm.vo.PageInfoVO;
+import com.onethefull.recipe.mapper.RcmdMapper;
+import com.onethefull.recipe.req.RcmdRecipeReq;
+import com.onethefull.recipe.req.UserMealReq;
+import com.onethefull.recipe.res.RcmdRecipe;
+import com.onethefull.recipe.res.RcmdRecipeBase;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+import com.onethefull.recipe.vo.RcmdStuffOwningVO;
+import com.onethefull.recipe.vo.RcmdStuffPMIVO;
+import com.onethefull.recipe.vo.RcmdStuffVO;
+import com.onethefull.recipe.vo.RecipeStuffVO;
+import com.onethefull.recipe.vo.StatisticMealofUserVO;
+
+@Service("recipeRcmdService")
+public class RecipeRcmdService {
+	
+	@Resource(name = "rcmdMapper")
+	private RcmdMapper rcmdMapper;
+	
+	public ResultWithData getRcmdStuffPMI(RcmdRecipeReq rcmdRecipeReq) {
+		
+		// ������� ������ ���
+		List<RcmdStuffOwningVO> userStufflist = rcmdMapper.getUserStuffs(rcmdRecipeReq);
+		if(!userStufflist.isEmpty()) {
+			
+		}
+		
+		List<RcmdStuffPMIVO> stuffList = null;
+		rcmdRecipeReq.seperateIds();
+		switch (rcmdRecipeReq.getStuffCount()) {
+		case 1 : stuffList = rcmdMapper.getStuffsPMI1Var(rcmdRecipeReq); break;
+		case 2 : stuffList = rcmdMapper.getStuffsPMI2Var(rcmdRecipeReq); break;
+		case 3 : stuffList = rcmdMapper.getStuffsPMI3Var(rcmdRecipeReq); break;
+		case 4 : stuffList = rcmdMapper.getStuffsPMI4Var(rcmdRecipeReq); break;
+		}
+		
+		this.checkStuffHaving(userStufflist, stuffList);
+	
+		return ResultWithData.succcessResult().addData("list", stuffList);
+	}
+	
+	private void checkStuffHaving(List<RcmdStuffOwningVO> userStufflist, List<RcmdStuffPMIVO> stuffList) {
+		if(stuffList == null || stuffList.isEmpty()) return;
+		
+		ArrayList<String> userStuffArray = new ArrayList<String>();
+		
+		for(RcmdStuffVO userStuff : userStufflist) {
+			userStuffArray.add(userStuff.getStuffId());
+		}
+		
+		for(RcmdStuffPMIVO stuff : stuffList) {
+			stuff.setStuffOwning1(userStuffArray.contains(stuff.getStuffId1()));
+			stuff.setStuffOwning2(userStuffArray.contains(stuff.getStuffId2()));
+			stuff.setStuffOwning3(userStuffArray.contains(stuff.getStuffId3()));
+			stuff.setStuffOwning4(userStuffArray.contains(stuff.getStuffId4()));
+		}
+		return;
+	}
+
+	public ResultWithData getRcmdRecipe(RcmdRecipeReq req) {
+		
+		// 정열 순서 
+		// SearchSortReq tmpSearchSortReq = req.getSortReq();
+		SearchFilterReq searchFilterReq = this.setSearchFilterReq(req.getFilterReq());
+		if(searchFilterReq != null) {
+			req.setFilterReq(searchFilterReq);
+		}
+		
+		PageInfoVO pageInfoVO = rcmdMapper.getRecommendRecipiesPageInfo(req);
+		pageInfoVO.setCurrentPageNum(req.getPageNum());
+		pageInfoVO.setPageSize(req.getPageSize());
+		
+		List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(req);
+		List<RcmdRecipe> recipeList = new ArrayList<RcmdRecipe>();
+		
+		if(list != null && !list.isEmpty()) {
+			for(RcmdRecipeVO recipe : list) {
+				RcmdRecipe rr = new RcmdRecipe();			
+				rr.setRecipeId(recipe.getRecipeId());
+				rr.setRecipeName(recipe.getRecipeName());
+				rr.setCategoryName(recipe.getCategoryName());
+				rr.setRecipeImageOriginalUrl(recipe.getImageOriginalUrl());
+				rr.setRecipeImageThumbUrl(recipe.getImageThumbUrl());
+				rr.setRecipeImageUrl(recipe.getImageUrl());
+				rr.setRecipeBaseOn(recipe.getBaseOn());		
+				rr.setHealthLevel(recipe.getHealthLevel());
+				rr.setIsRcmdbyHeath(recipe.getIsRcmdbyHeath());
+				rr.setIsPopular(recipe.getIsPopular());
+				rr.setIsTaste(recipe.getIsTaste());
+				rr.setIsAIRecipe(recipe.getIsAIRecipe());
+				rr.setCookingTime(String.valueOf(recipe.getCookingTime()) + "분");
+				rr.setCookDifficulty(recipe.getCookDifficulty());
+				
+				if(req.getUserId() != null && req.getIsIncludedStaticInfo()) {
+					StatisticMealofUserVO statisticInfo = rcmdMapper.getStatisticMealofUser(new UserMealReq(req.getUserId(), recipe.getRecipeId()));
+					rr.setStatisticInfo(statisticInfo);
+				}
+				recipeList.add(rr);
+			}
+		}
+
+		return ResultWithData.succcessResult().addData("list", recipeList).addData("pageInfo", pageInfoVO);
+	}
+	
+	protected SearchFilterReq setSearchFilterReq(SearchFilterReq rSearchFilterReq) {
+		
+		if(rSearchFilterReq == null || rSearchFilterReq.getConditions() == null || rSearchFilterReq.getConditions().isEmpty()) return null;
+		
+		SearchFilterReq filterReq = new SearchFilterReq();
+		List<SearchFilterUnitReq> list = new ArrayList<SearchFilterUnitReq>();
+				
+		for(SearchFilterUnitReq unit : rSearchFilterReq.getConditions()) {
+			if(unit.getFilterType().equals(SearchFilterType.POPULAR)) {
+				SearchFilterUnitReq realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("count_view");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);			
+				
+			} else if(unit.getFilterType().equals(SearchFilterType.TASTE)) {
+				SearchFilterUnitReq realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.sim");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);
+
+				realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);
+
+			} else if(unit.getFilterType().equals(SearchFilterType.HEALTH)) {
+				SearchFilterUnitReq realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.sim_h");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);
+
+				realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);				
+			} else if(unit.getFilterType().equals(SearchFilterType.CREATED)) {
+				
+				SearchFilterUnitReq realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.sim");
+				realUnit.setAscDescType(AscDescType.DESC);
+				realUnit.setFilterType(unit.getFilterType());
+				list.add(realUnit);
+
+				realUnit = new SearchFilterUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);			
+			}
+		}
+		
+		filterReq.setConditions(list);
+
+		return filterReq;
+	}		
+	
+	
+	protected SearchSortReq setSearchSortReq(SearchSortReq rSearchSortReq) {
+		
+		if(rSearchSortReq == null || rSearchSortReq.getConditions() == null || rSearchSortReq.getConditions().isEmpty()) return null;
+		
+		SearchSortReq sortReq = new SearchSortReq();
+		List<SearchSortUnitReq> list = new ArrayList<SearchSortUnitReq>();
+				
+		for(SearchSortUnitReq unit : rSearchSortReq.getConditions()) {
+			if(unit.getSortType().equals(SearchSortType.POPULAR)) {
+				SearchSortUnitReq realUnit = new SearchSortUnitReq();
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("count_view");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);			
+				
+			} else if(unit.getSortType().equals(SearchSortType.TASTE)) {
+				SearchSortUnitReq realUnit = new SearchSortUnitReq();
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.sim");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);
+
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);
+
+			} else if(unit.getSortType().equals(SearchSortType.HEALTH)) {
+				SearchSortUnitReq realUnit = new SearchSortUnitReq();
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.sim_h");
+				realUnit.setAscDescType(AscDescType.DESC);
+				list.add(realUnit);
+
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);				
+			} else if(unit.getSortType().equals(SearchSortType.CREATED)) {
+				
+				SearchSortUnitReq realUnit = new SearchSortUnitReq();
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.sim");
+				realUnit.setAscDescType(AscDescType.DESC);
+				realUnit.setSortType(unit.getSortType());
+				list.add(realUnit);
+
+				realUnit = new SearchSortUnitReq();
+				realUnit.setKeyCol("sim.id_recipe");
+				realUnit.setAscDescType(AscDescType.ASC);
+				list.add(realUnit);			
+			}
+		}
+		
+		sortReq.setConditions(list);
+
+		return sortReq;
+	}		
+
+	public ResultWithData getUserStuffOwningList(RcmdRecipeReq req) {
+		List<RcmdStuffOwningVO> userStufflist = rcmdMapper.getUserStuffs(req);
+		return ResultWithData.succcessResult().addData("list", userStufflist);
+	}
+
+	public ResultWithData getRcmdRecipeList(RcmdRecipeReq req) {
+		List<RecipeStuffVO> recipeLists = rcmdMapper.getStuffsofRecipe(req);
+		return ResultWithData.succcessResult().addData("list", recipeLists);
+	}
+
+	public ResultWithData getRcmdRecipeforMina(RcmdRecipeReq req) {
+		req.setPageSize(20);
+		
+		SearchFilterReq filterReq = new SearchFilterReq();
+		List<SearchFilterUnitReq> conditions = new ArrayList<SearchFilterUnitReq>();
+		SearchFilterUnitReq unit = new SearchFilterUnitReq();
+		unit.setFilterType(SearchFilterType.CREATED);
+		unit.setKeyCol("sim.sim");
+		unit.setAscDescType(AscDescType.DESC);
+		conditions.add(unit);
+
+		unit = new SearchFilterUnitReq();
+		unit.setKeyCol("sim.id_recipe");
+		unit.setAscDescType(AscDescType.ASC);
+		conditions.add(unit);
+			
+		filterReq.setConditions(conditions);
+		
+		req.setFilterReq(filterReq);
+		List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(req);
+		List<RcmdRecipeBase> recipeList = new ArrayList<RcmdRecipeBase>();
+		
+		if(list != null && !list.isEmpty()) {
+			
+			List<Integer> targets = new ArrayList<Integer>();
+			int num = 0;
+			num = list.size();
+
+			while(recipeList.size() < 3) {
+				int random = (int) (Math.random() * num);				
+				if(!targets.contains(random)) {
+					targets.add(random);
+					
+					RcmdRecipeVO recipe = list.get(random);
+					
+					RcmdRecipeBase rr = new RcmdRecipeBase();			
+					rr.setRecipeId(recipe.getRecipeId());
+					rr.setRecipeName(recipe.getRecipeName());
+					rr.setCategoryName(recipe.getCategoryName());
+					rr.setRecipeImageUrl(recipe.getImageUrl());
+
+					recipeList.add(rr);
+				}
+			}
+			
+		}
+		return ResultWithData.succcessResult().addData("list", recipeList);
+	}
+}

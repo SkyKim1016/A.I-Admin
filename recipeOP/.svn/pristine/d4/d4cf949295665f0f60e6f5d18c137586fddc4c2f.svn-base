@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.AdminMapper">
+	
+	<update id="adminStuff" parameterType="com.onethefull.recipe.req.RecipeStuffReq" statementType="CALLABLE">
+		{ CALL sp_recipe_stuff_master(#{stuffId}, ${seq}, #{recipeId}, #{stuffName}, #{quantityInfo}, null, #{actionType.code}, #{stuffId, mode=OUT, jdbcType=VARCHAR}, #{seq, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>	
+
+	<select id="getMainIntro" resultType="com.onethefull.recipe.res.MainContent">  
+	
+		SELECT content, case when content_type = 'I' then 'IMAGE' when content_type = 'T' then 'TEXT' end as contentType 
+		FROM recipe_proto.mst_main_intro
+		where status = 'A'
+		order by rand()
+		limit 0, 1
+		
+	</select>
+
+	<select id="getRecipiesPageInfo" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(r.id) as itemSize,  ceiling(count(r.id) * 1.0 / ${pageSize}) as lastPageNum  
+		from mst_recipe r
+  		join mst_recipe_ln r_l on r.id = r_l.id and r_l.id_language = #{languageId}
+  		<if test="baseRecipeId !=null and baseRecipeId != ''">
+			and r.id != #{baseRecipeId}
+		</if>
+		left join mst_category c on r.id_category = c.id 
+		left join mst_category_ln c_l on c.id = c_l.id and c_l.id_language = #{languageId}
+		left join mst_admin_operation a on a.id = 'VIEWCOUNT'
+		left join mst_admin_operation b on b.id = 'TASTELEVEL'
+		left join mst_admin_operation h on h.id = 'HEALTHLEVEL'
+		left join mst_admin_operation l on l.id = 'LIKECOUNT'
+		where 1 = 1
+		<if test="chefCode !=null and chefCode != ''">
+			and r.chefCode = #{chefCode}
+		</if>
+	</select> 
+	
+	<select id="getRecipies" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+		select r.id as recipeId, r_l.name as recipeName, c_l.name as categoryName, r.cook_time as cookingTime, r_l.writer as baseOn,
+		ifnull(r.image_original_url, r.image_url) as imageUrl, ifnull(r.image_original_url, r.image_url) as imageOriginalUrl, 
+		ifnull(r.image_thumb_url, r.image_url) as imageThumbUrl, r.group1 * r.group2 as healthLevel, r.is_ai as isAIRecipe,  
+		case when ( r.group1 * r.group2 <![CDATA[<]]> h.content_int  and r.group2 <![CDATA[<]]> 4 )  then 1 else 0 end as isRcmdbyHeath,
+		case when r.count_view <![CDATA[>]]> a.content_int and r.count_like <![CDATA[>]]> l.content_int then 1 else 0 end as isPopular,
+		ifnull(r.cook_difficulty, 3) as cookDifficulty
+
+		from mst_recipe r 
+  		join mst_recipe_ln r_l on r.id = r_l.id and r_l.id_language = #{languageId}
+  		<if test="baseRecipeId !=null and baseRecipeId != ''">
+			and r.id != #{baseRecipeId}
+		</if>
+  		<if test="eventId != null and eventId !=''">
+  		JOIN tbl_event_item ei on ei.id_event = #{eventd} AND ei.id_item = r.id
+  		</if>
+		left join mst_category c on r.id_category = c.id 
+		left join mst_category_ln c_l on c.id = c_l.id and c_l.id_language = #{languageId}
+		left join mst_admin_operation a on a.id = 'VIEWCOUNT'
+		left join mst_admin_operation b on b.id = 'TASTELEVEL'
+		left join mst_admin_operation h on h.id = 'HEALTHLEVEL'
+		left join mst_admin_operation l on l.id = 'LIKECOUNT'
+		where 1 = 1
+		<if test="chefCode !=null and chefCode != ''">
+			and r.chefCode = #{chefCode}
+		</if>
+		order by r.id desc
+		limit ${startNum}, ${pageSize}
+
+	</select>
+	
+	<select id="getIngrListPageInfo" parameterType="com.onethefull.recipe.req.RecipeStuffReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(stuff.id) as itemSize,  ceiling(count(stuff.id) * 1.0 / ${pageSize}) as lastPageNum  
+		FROM mst_stuff stuff
+		join mst_stuff_ln s_l on stuff.id = s_l.id and s_l.id_language = #{languageId}
+		LEFT JOIN mst_category_stuff category on stuff.id_category = category.id
+		left join mst_category_stuff_ln category_l on category.id = category_l.id and category_l.id_language = #{languageId}
+	</select> 	
+	
+	<select id="getIngrList" parameterType="com.onethefull.recipe.req.RecipeStuffReq" resultType="com.onethefull.recipe.vo.StuffVO">
+		SELECT stuff.id as stuffId, s_l.name as stuffName, stuff.id_category as stuffCategoryId, category_l.name as categoryName, ifnull(stuff.image_url, category.image_url) as stuffImageUrl 
+		FROM mst_stuff stuff
+		join mst_stuff_ln s_l on stuff.id = s_l.id and s_l.id_language = #{languageId}
+		LEFT JOIN mst_category_stuff category on stuff.id_category = category.id
+		left join mst_category_stuff_ln category_l on category.id = category_l.id and category_l.id_language = #{languageId}
+		order by stuff.name
+		limit ${startNum}, ${pageSize}
+	</select>	
+		
+</mapper>

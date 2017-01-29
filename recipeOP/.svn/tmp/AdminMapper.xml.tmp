@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.AdminMapper">
+	
+	<update id="adminStuff" parameterType="com.onethefull.recipe.req.RecipeStuffReq" statementType="CALLABLE">
+		{ CALL sp_recipe_stuff_master(#{stuffId}, ${seq}, #{recipeId}, #{stuffName}, #{quantityInfo}, null, #{actionType.code}, #{stuffId, mode=OUT, jdbcType=VARCHAR}, #{seq, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>	
+
+	<select id="getMainIntro" resultType="com.onethefull.recipe.res.MainContent">  
+	
+		SELECT content, case when content_type = 'I' then 'IMAGE' when content_type = 'T' then 'TEXT' end as contentType 
+		FROM recipe_proto.mst_main_intro
+		where status = 'A'
+		order by rand()
+		limit 0, 1
+		
+	</select>
+	
+	<select id="getRecipeList"  resultType="com.onethefull.recipe.vo.RecipeMasterVO" parameterType="com.onethefull.recipe.req.RcmdRecipeReq">  
+	
+		SELECT id AS recipeId, 
+		name as recipeName
+		from mst_recipe
+		limit 0,10;
+		
+	</select>
+
+
+</mapper>

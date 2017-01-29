@@ -1,0 +1,140 @@
+a, p, ul, li, dl, dt, dd {
+  text-shadow: none;
+  margin: 0;
+  padding: 0; }
+
+ul, li {
+  list-style-type: none; }
+
+.ui-loader {
+  display: none !important; }
+
+.ui-header {
+  background: #28ab8b !important;
+  border: none;
+  z-index: 1002; }
+
+.ui-footer {
+  background: #353535 !important; }
+
+.ui-btn, .ui-btn:active, .ui-btn:hover {
+  font-family: 'Tahoma Regular', Verdana, Segoe, sans-serif;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  font-weight: normal; }
+
+.ui-header img {
+  width: 90%;
+  padding: 10px 0 5px; }
+
+ion-content {
+  background-color: #f9f9f9 !important; }
+
+.slider-pager {
+  bottom: 7% !important; }
+
+.bar-positive {
+  background: #28ab8b !important;
+  border-color: #28ab8b !important; }
+
+.menu-color {
+  background-color: #28ab8b !important; }
+  .menu-color .item {
+    border-color: #28ab8b !important; }
+  .menu-color .item-content {
+    background-color: #28ab8b !important;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold; }
+
+ion-list#fridge-info ion-item.fridge-content {
+  padding: 0px !important;
+  border: none !important; }
+
+.ion-ios-recipe-main:before,
+.ion-ios-recipe-fridge:before,
+.ion-ios-recipe-condition:before,
+.ion-ios-recipe-weekly:before,
+.ion-ios-recipe-share:before,
+.ion-ios-recipe-main-on:before,
+.ion-ios-recipe-fridge-on:before,
+.ion-ios-recipe-condition-on:before,
+.ion-ios-recipe-weekly-on:before,
+.ion-ios-recipe-share-on:before {
+  display: inline-block;
+  font-family: "Ionicons";
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  text-rendering: auto;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; }
+
+.ion-ios-recipe-main:before {
+  content: url("../img/ico/main-ico.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-fridge:before {
+  content: url("../img/ico/fridge-ico.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-condition:before {
+  content: url("../img/ico/condition-ico.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-weekly:before {
+  content: url("../img/ico/weekly-ico.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-share:before {
+  content: url("../img/ico/share-ico.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-main-on:before {
+  content: url("../img/ico/main-ico-on.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-fridge-on:before {
+  content: url("../img/ico/fridge-ico-on.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-condition-on:before {
+  content: url("../img/ico/condition-ico-on.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-weekly-on:before {
+  content: url("../img/ico/weekly-ico-on.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.ion-ios-recipe-share-on:before {
+  content: url("../img/ico/share-ico-on.png") !important;
+  transform: scale(0.5) !important;
+  position: relative;
+  top: -60%; }
+
+.tab-nav.tabs {
+  background-color: #333333; }
+  .tab-nav.tabs .tab-item {
+    border: #454343 solid 1px !important; }

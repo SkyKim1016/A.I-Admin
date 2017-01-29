@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:8080/recipe/rapi/noti/list</URL><method>POST</method><headers><header key="auth_token" value="52efc3a4da69670bbd8780941b40e53bc88a1634fa83edc94b32cf73a024b6a3"/></headers><body><string content-type="application/json" charset="UTF-8">{}</string></body></request></rest-client>

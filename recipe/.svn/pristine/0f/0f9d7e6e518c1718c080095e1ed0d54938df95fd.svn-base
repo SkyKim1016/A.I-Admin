@@ -1,0 +1,35 @@
+package com.onethefull.recipe.req;
+
+public class RecipeStuffReq {
+	private String recipeId;
+	private String stuffName;
+	private String quantityInfo;
+	
+	public RecipeStuffReq(){}
+
+	public String getRecipeId() {
+		return recipeId;
+	}
+
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+
+	public String getStuffName() {
+		return stuffName;
+	}
+
+	public void setStuffName(String stuffName) {
+		this.stuffName = stuffName;
+	}
+
+	public String getQuantityInfo() {
+		return quantityInfo;
+	}
+
+	public void setQuantityInfo(String quantityInfo) {
+		this.quantityInfo = quantityInfo;
+	}
+
+
+}

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.onethefull.recipe.mapper.CognizeMapper">
+
+	<update id="insertCondition" parameterType="com.onethefull.recipe.req.ConditionCognizeReq" statementType="CALLABLE">
+		{ CALL  sp_cognize_fridge_master(null, #{userId}, #{imageUrl}, null, null, #{actionType.code}, #{id, mode=OUT, jdbcType=VARCHAR}, #{count, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+
+	<update id="updateConditionCognizeForReceipt" parameterType="com.onethefull.recipe.req.ConditionCognizeReq" statementType="CALLABLE">
+		{ CALL  sp_cognize_fridge_master(#{id}, null, null, null, #{userId}, #{actionType.code}, #{id, mode=OUT, jdbcType=VARCHAR}, #{count, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+
+	<update id="updateConditionCognizeForContent" parameterType="com.onethefull.recipe.req.ConditionCognizeReq" statementType="CALLABLE">
+		{ CALL  sp_cognize_fridge_master(#{id}, null, null, #{stuffIds}, #{userId}, #{actionType.code}, #{id, mode=OUT, jdbcType=VARCHAR}, #{count, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+
+	<select id="getCondtionCognizeRequestListPageInfo" parameterType="com.onethefull.recipe.req.ConditionCognizeReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(id) as itemSize,  ceiling(count(id) * 1.0 / ${pageSize}) as lastPageNum  
+		FROM tbl_user_condition_img
+		WHERE 1=1
+		<if test="userId != null and userId != ''">
+			AND user_id = #{userId}
+		</if>
+		<if test="status != null">
+			AND status = #{status.code}
+		</if>
+		<if test="viewStatus != null">
+			AND view_status = #{viewStatus.code}
+		</if>
+	</select>
+
+	<select id="getCondtionCognizeRequestList" parameterType="com.onethefull.recipe.req.ConditionCognizeReq" resultType="com.onethefull.recipe.vo.ConditionCognizeVO">  
+		SELECT id, userid as userId, image_url as imageUrl, status, view_status as viewStatus, request_date as requestDate
+		FROM tbl_user_condition_img
+		WHERE 1=1
+		<if test="userId != null and userId != ''">
+			AND user_id = #{userId}
+		</if>
+		<if test="status != null">
+			AND status = #{status.code}
+		</if>
+		<if test="viewStatus != null">
+			AND view_status = #{viewStatus.code}
+		</if>
+		order by request_date DESC
+		limit ${startNum}, ${pageSize}
+	</select>
+
+	<select id="getConditionCognize" parameterType="com.onethefull.recipe.req.CognizeReq" resultType="com.onethefull.recipe.vo.ConditionCognizeVO">
+		SELECT id, userid as userId, image_url as imageUrl, status, view_status as viewStatus, request_date as requestdate
+		FROM tbl_user_condition_img
+		WHERE id = #{id}
+	</select>
+
+</mapper>

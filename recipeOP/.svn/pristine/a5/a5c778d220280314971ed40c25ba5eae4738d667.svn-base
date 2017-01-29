@@ -1,0 +1,24 @@
+package com.onethefull.recipe.mapper;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.onethefull.recipe.comm.vo.PageInfoVO;
+import com.onethefull.recipe.req.RcmdRecipeReq;
+import com.onethefull.recipe.req.RecipeStuffReq;
+import com.onethefull.recipe.res.MainContent;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+import com.onethefull.recipe.vo.StuffVO;
+
+@Repository("adminMapper")
+public interface AdminMapper {
+
+	public int adminStuff(RecipeStuffReq req);
+	public MainContent getMainIntro();
+	public PageInfoVO getRecipiesPageInfo(RcmdRecipeReq req);
+	public List<RcmdRecipeVO> getRecipies(RcmdRecipeReq req); 
+	public PageInfoVO getIngrListPageInfo(RecipeStuffReq req);
+	public List<StuffVO> getIngrList(RecipeStuffReq req); 
+
+}

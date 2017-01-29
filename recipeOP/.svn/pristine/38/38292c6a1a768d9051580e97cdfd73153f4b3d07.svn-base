@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://104.199.135.28:8080/recipe/rapi/recipe/ingr/list/forcreate</URL><method>GET</method><headers><header key="auth_token" value="4f54be2b6e1bbd5eb8921bc5d8cb53a37129074a443cf756159e5201847245da"/></headers></request></rest-client>

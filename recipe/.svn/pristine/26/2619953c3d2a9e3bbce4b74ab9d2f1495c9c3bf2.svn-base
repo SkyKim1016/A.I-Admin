@@ -1,0 +1,73 @@
+package com.onethefull.recipe.req;
+
+import com.onethefull.recipe.type.AdminActionType;
+
+public class RecipeStuffReq {
+	private String recipeId;
+	private String stuffId;
+	private String stuffName;
+	private String quantityInfo;
+	private int seq = 0;
+	private AdminActionType actionType;
+	private String resultCode;
+	
+	public RecipeStuffReq(){}
+
+	public String getRecipeId() {
+		return recipeId;
+	}
+
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+
+	public String getStuffName() {
+		return stuffName;
+	}
+
+	public void setStuffName(String stuffName) {
+		this.stuffName = stuffName;
+	}
+
+	public String getQuantityInfo() {
+		return quantityInfo;
+	}
+
+	public void setQuantityInfo(String quantityInfo) {
+		this.quantityInfo = quantityInfo;
+	}
+
+	public String getStuffId() {
+		return stuffId;
+	}
+
+	public void setStuffId(String stuffId) {
+		this.stuffId = stuffId;
+	}
+
+	public int getSeq() {
+		return seq;
+	}
+
+	public void setSeq(int seq) {
+		this.seq = seq;
+	}
+
+	public AdminActionType getActionType() {
+		return actionType;
+	}
+
+	public void setActionType(AdminActionType actionType) {
+		this.actionType = actionType;
+	}
+
+	public String getResultCode() {
+		return resultCode;
+	}
+
+	public void setResultCode(String resultCode) {
+		this.resultCode = resultCode;
+	}
+
+
+}

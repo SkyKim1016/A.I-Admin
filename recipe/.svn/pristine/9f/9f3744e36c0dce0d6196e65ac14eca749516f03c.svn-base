@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.onethefull.recipe.mapper.RcmdMapper">
+
+	<select id="getRecommendRecipies" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+		select distinct r.id as recipeId, r.name as recipeName, c.name as categoryName, ifnull(r.image_original_url, r.image_url) as imageUrl
+		from mst_recipe r
+		left join mst_category c on r.id_category = c.id 
+		${queryString}
+		<if test="chefCode !=null and chefCode != ''">
+			and r.chefCode = #{chefCode}
+		</if>
+		limit 0, #{pageSize}
+
+	</select>
+	
+	<select id="getRecommendRecipiesChef" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+	
+		select r.id as recipeId, r.name as recipeName, c.name as categoryName, r.image_url as imageUrl
+		from mst_recipe r
+		left join mst_category c on r.id_category = c.id
+		where r.chefcode = #{chefCode}
+		order by rand() 
+		limit 0, 1;
+		
+	</select>	
+	
+	<select id="getRecommendRecipiesforHealth" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+	
+		select recipeId, recipeName, categoryName, imageUrl, nutrientQty1, nutrientMeasure1, nutrientQty2, nutrientMeasure2
+		from (
+			SELECT DISTINCT    r.id AS recipeId,    r.name AS recipeName,   c.name AS categoryName,    r.image_url AS imageUrl, 
+			 mn01.totalquantity as nutrientQty1, case when mn01.totalquantity > 1200 then 1 else 0 end as nutrientMeasure1,
+			 mn02.totalquantity as nutrientQty2, case when mn01.totalquantity > 140 then 1 else mn01.totalquantity end as nutrientMeasure2
+			FROM mst_recipe r
+			LEFT JOIN mst_category c ON r.id_category = c.id
+			${queryStringJoin}
+			left JOIN (
+				SELECT meal.id_recipe, sum(case when n.unit = 'kg' then n.quantity * 1000000 when n.unit = 'g' then n.quantity * 1000 when n.unit = 'mg' then n.quantity else 0 end) as totalquantity
+				FROM recipe_proto.tbl_user_meal meal
+				join mst_recipe_nutrient n on meal.id_recipe = n.id_recipe
+				join mst_nutrient nt on n.id_nutrient = nt.id and nt.name = '나트륨'
+				where meal.id_user = #{userId}
+				and meal.reg_date > DATE_ADD(now() ,INTERVAL -2 week)
+				group by meal.id_recipe, n.id_nutrient
+			) mn01 on r.id = mn01.id_recipe
+			left JOIN (
+				SELECT meal.id_recipe, sum(case when n.unit = 'kg' then n.quantity * 1000000 when n.unit = 'g' then n.quantity * 1000 when n.unit = 'mg' then n.quantity else 0 end) as totalquantity
+				FROM recipe_proto.tbl_user_meal meal
+				join mst_recipe_nutrient n on meal.id_recipe = n.id_recipe
+				join mst_nutrient nt on n.id_nutrient = nt.id and nt.name = '철분'
+				where meal.id_user = #{userId}
+				and meal.reg_date > DATE_ADD(now() ,INTERVAL -2 week)
+				group by meal.id_recipe, n.id_nutrient
+			) mn02 on r.id = mn02.id_recipe
+			${queryStringWhere}
+		) a
+		order by nutrientMeasure1 asc
+		limit 0, 20
+	</select>
+
+	<select id="getUserStuffs" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffOwningVO">  
+		select h.id as userStuffId, h.id_user as userId, h.id_stuff as stuffId, s.name as stuffName, h.qty, h.unit, h.expiration_date expirationDate
+		from mst_user_stuff_having h
+		join mst_stuff s on h.id_stuff = s.id
+		where h.id_user = #{userId}
+		order by h.id_stuff desc
+
+	</select>
+
+	<select id="getStuffsPMI1Var" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		
+		select t.id_stuff1 as stuffId1, t.id_stuff2 as stuffId2, t.id_stuff3 as stuffId3, t.id_stuff4 as stuffId4,
+		a1.name as stuffName1, a2.name as stuffName2, a3.name as stuffName3, a4.name as stuffName4, t.pmi  
+		from tbl_pmi_4stuff t
+		left join mst_stuff a1 on t.id_stuff1 = a1.id
+		left join mst_stuff a2 on t.id_stuff2 = a2.id
+		left join mst_stuff a3 on t.id_stuff3 = a3.id
+		left join mst_stuff a4 on t.id_stuff4 = a4.id
+		where 1 =1
+		and (
+			( t.id_stuff1 = #{stuffId1})
+		    or (t.id_stuff2 = #{stuffId1})
+		    or (t.id_stuff3 = #{stuffId1})
+		    or (t.id_stuff4 = #{stuffId1})
+		    )
+		order by t.pmi desc
+		limit 0, 20
+	
+	</select>
+
+	<select id="getStuffsPMI2Var" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		select t.id_stuff1 as stuffId1, t.id_stuff2 as stuffId2, t.id_stuff3 as stuffId3, t.id_stuff4 as stuffId4,
+		a1.name as stuffName1, a2.name as stuffName2, a3.name as stuffName3, a4.name as stuffName4, t.pmi  
+		from tbl_pmi_4stuff t
+		left join mst_stuff a1 on t.id_stuff1 = a1.id
+		left join mst_stuff a2 on t.id_stuff2 = a2.id
+		left join mst_stuff a3 on t.id_stuff3 = a3.id
+		left join mst_stuff a4 on t.id_stuff4 = a4.id
+		where 1 =1
+		and (
+			( t.id_stuff1 = #{stuffId1} and t.id_stuff2 = #{stuffId2})
+		    or (t.id_stuff1 = #{stuffId1} and t.id_stuff3 = #{stuffId2} )
+		    or (t.id_stuff1 = #{stuffId1} and t.id_stuff4 = #{stuffId2} )
+		    or (t.id_stuff2 = #{stuffId1} and t.id_stuff3 = #{stuffId2} )
+		    or (t.id_stuff2 = #{stuffId1} and t.id_stuff4 = #{stuffId2} )
+		    or (t.id_stuff3 = #{stuffId1} and t.id_stuff4 = #{stuffId2} )
+		    )
+		order by t.pmi desc
+		limit 0,20
+
+	</select>
+
+	<select id="getStuffsPMI3Var" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		select t.id_stuff1 as stuffId1, t.id_stuff2 as stuffId2, t.id_stuff3 as stuffId3, t.id_stuff4 as stuffId4,
+		a1.name as stuffName1, a2.name as stuffName2, a3.name as stuffName3, a4.name as stuffName4, t.pmi  
+		from tbl_pmi_4stuff t
+		left join mst_stuff a1 on t.id_stuff1 = a1.id
+		left join mst_stuff a2 on t.id_stuff2 = a2.id
+		left join mst_stuff a3 on t.id_stuff3 = a3.id
+		left join mst_stuff a4 on t.id_stuff4 = a4.id
+		where 1 =1
+		and (
+			( t.id_stuff1 = #{stuffId1} and t.id_stuff2 = #{stuffId2} and t.id_stuff3 = #{stuffId3})
+		    or (t.id_stuff1 = #{stuffId1} and t.id_stuff2 = #{stuffId2} and t.id_stuff4 = #{stuffId3} )
+		    or (t.id_stuff1 = #{stuffId1} and t.id_stuff3 = #{stuffId2} and t.id_stuff4 = #{stuffId3} )
+		    or (t.id_stuff2 = #{stuffId1} and t.id_stuff3 = #{stuffId2} and t.id_stuff4 = #{stuffId3} )
+		    )
+		-- and t.id_stuff3 = '20160416152148'
+		order by t.pmi desc
+		limit 0,20
+	</select>
+
+	<select id="getStuffsPMI4Var" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		select t.id_stuff1 as stuffId1, t.id_stuff2 as stuffId2, t.id_stuff3 as stuffId3, t.id_stuff4 as stuffId4,
+		a1.name as stuffName1, a2.name as stuffName2, a3.name as stuffName3, a4.name as stuffName4, t.pmi  
+		from tbl_pmi_4stuff t
+		left join mst_stuff a1 on t.id_stuff1 = a1.id
+		left join mst_stuff a2 on t.id_stuff2 = a2.id
+		left join mst_stuff a3 on t.id_stuff3 = a3.id
+		left join mst_stuff a4 on t.id_stuff4 = a4.id
+		where 1 =1
+		and (
+			( t.id_stuff1 = #{stuffId1} and t.id_stuff2 = #{stuffId2} and t.id_stuff3 = #{stuffId3} and t.id_stuff4 = #{stuffId4} )
+		    )
+		order by t.pmi desc
+		limit 0,20
+	</select>
+
+	<select id="getStatisticMealofUser" parameterType="com.onethefull.recipe.req.UserMealReq" resultType="com.onethefull.recipe.vo.StatisticMealofUserVO">  
+	
+		select max(cnt_week) as cntWeek, max(cnt_month) as cntMonth, max(cnt_quarter) as cntQuarter, max(cnt_half) as cntHalf, max(cnt_year) as cntYear
+		from (
+			select count(id) as cnt_week, 0 as cnt_month, 0  as cnt_quarter, 0 as cnt_half, 0  as cnt_year
+			from tbl_user_meal
+			where id_recipe = #{recipeId} and id_user = #{userId}
+			and reg_date >= date_add(now(), interval -1 week) 
+			union all
+			select 0 as cnt_week, count(id) as cnt_month, 0  as cnt_quarter, 0 as cnt_half, 0  as cnt_year
+			from tbl_user_meal
+			where id_recipe = #{recipeId} and id_user = #{userId}
+			and reg_date >= date_add(now(), interval -1 month) 
+			union all
+			select 0 as cnt_week, 0 as cnt_month, count(id) as cnt_quarter, 0 as cnt_half, 0  as cnt_year
+			from tbl_user_meal
+			where id_recipe = #{recipeId} and id_user = #{userId}
+			and reg_date >= date_add(now(), interval -3 month) 
+			union all
+			select 0 as cnt_week, 0 as cnt_month, 0 as cnt_quarter, count(id) as cnt_half, 0  as cnt_year
+			from tbl_user_meal
+			where id_recipe = #{recipeId} and id_user = #{userId}
+			and reg_date >= date_add(now(), interval -6 month) 
+			union all
+			select 0 as cnt_week, 0 as cnt_month, 0 as cnt_quarter, 0 as cnt_half, count(id) as cnt_year
+			from tbl_user_meal
+			where id_recipe = #{recipeId} and id_user = #{userId}
+			and reg_date >= date_add(now(), interval -1 year) 
+		) a
+		
+	</select>
+
+	<select id="getStuffsofRecipe" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RecipeStuffVO">  
+
+		select mt.id_recipe as recipeId, r.name as recipeName, mt.id_stuff as stuffId, s.name as stuffName
+		from mst_recipe_stuff_mt mt
+		join mst_recipe r on mt.id_recipe = r.id
+		join mst_stuff s on mt.id_stuff = s.id
+		where 1 = 1
+		<if test="userId !=null and userId != ''">
+			and mt.id_recipe = #{recipeId}
+		</if>
+
+	</select>
+	
+	<select id="getAdditionalStuffsforRecommend" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+	
+		select a.id_stuff1 as stuffId1, a.id_stuff2 as stuffId2, s1.name as stuffName1, s2.name as stuffName2, a.pmi, a.rcmd_date, a.dt, 
+		case when a.rcmd_date is null then 0
+		when dt <![CDATA[<]]> TIMESTAMPDIFF(MINUTE, now(), DATE_ADD(now() ,INTERVAL -3 DAY)) then 0 
+		else  dt - TIMESTAMPDIFF(MINUTE, now(), DATE_ADD(now() ,INTERVAL -3 DAY)) 
+		end as rt
+		from (
+			select pmi.id_stuff1, pmi.id_stuff2, pmi.pmi, h1.rcmd_date, ifnull(TIMESTAMPDIFF(MINUTE, now(), rcmd_date),0) as dt
+			from tbl_pmi_2stuff pmi
+			join mst_user_stuff_having u1 on u1.id_user = #{userId}
+			join mst_user_stuff_having u2 on u2.id_user = #{userId}
+			left join tbl_user_recommend_stuff_history h1 on h1.id_user = #{userId} and ( h1.id_stuff = u1.id_stuff or h1.id_stuff = u2.id_stuff)
+			where pmi.id_stuff1 = u1.id_stuff and pmi.id_stuff2 = u2.id_stuff
+			and (
+				pmi.id_stuff1 not in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+				or pmi.id_stuff2 not in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+			)
+		) a
+        left join mst_stuff s1 on a.id_stuff1 = s1.id
+        left join mst_stuff s2 on a.id_stuff2 = s2.id
+        order by rt, a.pmi desc;
+	</select>
+
+	<select id="getRecommendStuffsforTaste" parameterType="com.onethefull.recipe.req.RecipeSetReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		select pmi.id_stuff1 as stuffId1, pmi.id_stuff2 as stuffId2, pmi.pmi
+		from tbl_pmi_2stuff pmi
+		join mst_user_stuff_having u1 on u1.id_user = #{userId}
+		join mst_user_stuff_having u2 on u2.id_user = #{userId}
+		where pmi.id_stuff1 = u1.id_stuff and pmi.id_stuff2 = u2.id_stuff
+		<if test="emptyRecipeIngrList">
+			and (
+				pmi.id_stuff1 in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+				or pmi.id_stuff2 in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+			)
+		</if>
+		<if test="!emptyRecipeIngrList">
+			and (
+				pmi.id_stuff1 in ( select id from mst_stuff where 
+				<foreach collection="recipeIngrList" item="ingredient" open=" name in (" separator=" , " close=")">
+					#{ingredient.ingredientName}
+				</foreach>
+				) or 
+				pmi.id_stuff2 in ( select id from mst_stuff where 
+				<foreach collection="recipeIngrList" item="ingredient" open=" name in (" separator=" , " close=")">
+					#{ingredient.ingredientName}
+				</foreach>
+				)
+			)
+		</if>
+		
+	    order by pmi desc
+	    limit 0, 5;
+	</select>
+	
+	<select id="getRecommendStuffsbyPMI" parameterType="com.onethefull.recipe.req.RecipeSetReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		SELECT 
+		    pmi.id_stuff1 AS stuffId1, pmi.id_stuff2 AS stuffId2, pmi.pmi
+		FROM
+		    tbl_pmi_2stuff pmi
+		
+		ORDER BY pmi DESC
+		LIMIT 0 , 100;
+	</select>
+	
+	
+	<select id="getRecommendStuffsforTasteSub" parameterType="com.onethefull.recipe.req.RecipeSetReq" resultType="com.onethefull.recipe.vo.RcmdStuffPMIVO">  
+		select pmi.id_stuff1 as stuffId1, pmi.id_stuff2 as stuffId2, pmi.pmi
+		from tbl_pmi_2stuff pmi
+		where 1 = 1
+		<if test="emptyRecipeIngrList">
+			and (
+				pmi.id_stuff1 in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+				or pmi.id_stuff2 in (select id_stuff from tbl_user_recommend_stuff where id_user = #{userId} )
+			)
+		</if>
+		<if test="!emptyRecipeIngrList">
+			and (
+				pmi.id_stuff1 in ( select id from mst_stuff where 
+				<foreach collection="recipeIngrList" item="ingredient" open=" name in (" separator=" , " close=")">
+					#{ingredient.ingredientName}
+				</foreach>
+				) or 
+				pmi.id_stuff2 in ( select id from mst_stuff where 
+				<foreach collection="recipeIngrList" item="ingredient" open=" name in (" separator=" , " close=")">
+					#{ingredient.ingredientName}
+				</foreach>
+				)
+			)
+		</if>
+		
+	    order by pmi desc
+	    limit 0, 5;
+	</select>
+	
+	
+	
+	<update id="setNewRecommendStuffs" parameterType="com.onethefull.recipe.req.RcmdRecipeReq" statementType="CALLABLE">
+		{ CALL  sp_set_stuff_for_recommend(#{userId}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+		
+	</update>	
+
+	<select id="getIngriFromRecipe" parameterType="com.onethefull.recipe.req.AIRecipeReq" resultType="com.onethefull.recipe.vo.AiRecipeIngriVO"> 
+		select ms.name ingriName from mst_recipe_stuff mrs join mst_stuff ms on mrs.id_stuff = ms.id 
+		where 1 = 1
+		<if test="recipeId != null">
+			and mrs.id_recipe = #{recipeId}
+		</if>
+	</select>
+	
+	<select id="getProcessList" parameterType="com.onethefull.recipe.req.AIProcessReq" resultType="com.onethefull.recipe.vo.AiProcessVO">
+		select id_recipe, seq, process_info from mst_recipe_process 
+		where 1 = 1 
+		<if test="recipeId != null">
+			and ifnull(process_info like CONCAT('%', #{ingriName}, '%'), null) 
+			and id_recipe = #{recipeId}
+		</if>
+	</select>
+	
+	<select id="getPhaseBySeq" parameterType="com.onethefull.recipe.req.AIRecipeSeqReq" resultType="com.onethefull.recipe.vo.AiRecipeIngriVO">
+		select p.id_recipe, p.seq stepSeq, p.process_info, s.ingriName ingriName, ifnull(s.ingreImgURL, s.ingreCategoryImgURL) as ingreImgURL,  ifnull(p.process_info like CONCAT('%', s.ingriName, '%'), null) as ex 
+		from mst_recipe_process p
+		join (
+		  select ms.name ingriName, ms.image_url as ingreImgURL, cs.image_url as ingreCategoryImgURL  
+		  from mst_recipe_stuff mrs 
+		  join mst_stuff ms on mrs.id_stuff = ms.id 
+      		left join mst_category_stuff cs on ms.id_category = cs.id
+		  where mrs.id_recipe = #{id_recipe}
+		  ) s
+		where 1=1
+		<if test="id_recipe != null and stepSeq != null" >
+		and p.id_recipe = #{id_recipe} and p.seq = #{stepSeq} 
+		and ifnull(p.process_info like CONCAT('%', s.ingriName, '%'), null) = 1
+		order by stepSeq, ingriName;
+		</if>
+	</select>
+	
+	<select id="getPhaseList" parameterType="com.onethefull.recipe.req.AIProcessReq" resultType="com.onethefull.recipe.vo.AiRecipePhaseVO">
+		select a.id_recipe id_recipe, a.seq seq, a.phasecode phasecode, a.cnt, a.priority, prs.process_info process_info
+		from (
+		  select id_recipe, seq, phasecode, cnt, 
+		  case when seq  = 1 and phasecode = '세척 및 손질' and cnt >= 1 then  10 
+		  when seq >= 4 and phasecode = '마무리' and cnt >= 1 then  10 
+		  when seq >= 3 and phasecode ='세척 및 손질' and cnt >= 1 then -1
+		  when phasecode = '끓이기'  and cnt >= 1 then  9
+		  when phasecode = '썰기'  and cnt >= 1 then  8
+		  when phasecode = '간하기'  and cnt >= 1 then  7
+		  else 0 end as priority
+		  from (
+		  select id_recipe, seq, phasecode, count(phasecode) as cnt 
+		  from tbl_recipe_phase 
+		  where id_recipe = #{recipeId}
+		  group by id_recipe, seq, phasecode
+		  ) a
+		) a
+		join (
+		  select id_recipe, seq, max(priority) as priority
+		  from (
+		    select id_recipe, seq, phasecode, cnt, 
+		    case when seq  = 1 and phasecode = '세척 및 손질' and cnt >= 1 then  10 
+		    when seq >= 4 and phasecode = '마무리' and cnt >= 1 then  10 
+		    when seq >= 3 and phasecode ='세척 및 손질' and cnt >= 1 then -1
+		    when phasecode = '끓이기'  and cnt >= 1 then  9
+		    when phasecode = '썰기'  and cnt >= 1 then  8
+		    when phasecode = '간하기'  and cnt >= 1 then  7
+		    else 0 end as priority
+		    from (
+		    select id_recipe, seq, phasecode, count(phasecode) as cnt 
+		    from tbl_recipe_phase 
+		    where id_recipe = #{recipeId}
+		    group by id_recipe, seq, phasecode
+		    ) a
+		  ) a
+		  group by id_recipe, seq
+		) b on a.id_recipe = b.id_recipe and a.seq = b.seq and a.priority = b.priority
+		left join mst_recipe_process prs on a.id_recipe = prs.id_recipe and a.seq = prs.seq
+		order by a.id_recipe, a.seq;
+	</select>
+
+</mapper>

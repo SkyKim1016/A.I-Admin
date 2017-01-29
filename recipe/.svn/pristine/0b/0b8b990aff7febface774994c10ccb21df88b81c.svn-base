@@ -1,0 +1,202 @@
+package com.onethefull.recipe.req;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.onethefull.recipe.comm.req.PageReq;
+
+public class RcmdRecipeReq extends PageReq {
+	private String userId;
+	private String recipeId;
+	private List<String> stuffIds;
+	private String stuffId1;
+	private String stuffId2;
+	private String stuffId3;
+	private String stuffId4;
+	private String chefCode;
+	private boolean isIncludedStaticInfo = false;
+	
+	public RcmdRecipeReq() {
+	}
+	public RcmdRecipeReq(String recipeId, String userId) {
+		super();
+		this.setRecipeId(recipeId);
+		this.setUserId(userId);
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getRecipeId() {
+		return recipeId;
+	}
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+	public void seperateIds() {
+		if(this.stuffIds == null || this.stuffIds.isEmpty()) return;
+		
+		Collections.sort(this.stuffIds, Collections.reverseOrder());
+		
+		int i = 0;
+		for(String id : this.stuffIds) {
+			if(i==0) {
+				this.stuffId1 = id;
+			} else if(i==1) {
+				this.stuffId2 = id;
+			} else if(i==2) {
+				this.stuffId3 = id;			
+			} else if(i==3) {
+				this.stuffId4 = id;
+			}
+			i++;
+		}
+	}
+	public int getStuffCount() {
+		if(this.stuffIds == null || this.stuffIds.isEmpty()) return 0;
+		return this.stuffIds.size();
+	}
+	public String getStuffId1() {
+		return stuffId1;
+	}
+	public void setStuffId1(String stuffId1) {
+		this.stuffId1 = stuffId1;
+	}
+	public String getStuffId2() {
+		return stuffId2;
+	}
+	public void setStuffId2(String stuffId2) {
+		this.stuffId2 = stuffId2;
+	}
+	public String getStuffId3() {
+		return stuffId3;
+	}
+	public void setStuffId3(String stuffId3) {
+		this.stuffId3 = stuffId3;
+	}
+	public String getStuffId4() {
+		return stuffId4;
+	}
+	public void setStuffId4(String stuffId4) {
+		this.stuffId4 = stuffId4;
+	}
+	public List<String> getStuffIds() {
+		return stuffIds;
+	}
+	public void setStuffIds(List<String> stuffIds) {
+		this.stuffIds = stuffIds;
+	}
+	public void addStuffId(String stuffId) {
+		if(this.stuffIds == null) this.stuffIds = new ArrayList<String>();
+		if(!this.stuffIds.contains(stuffId)) {
+			this.stuffIds.add(stuffId);			
+		}
+	}
+	public boolean isEmptyStuffIds() {
+		return stuffIds == null || stuffIds.isEmpty();
+	}
+	public String getStuffIdsInfo() {
+		if (this.stuffIds == null) {
+			return null;
+		}
+		
+		String str = "";
+		for(String id : this.stuffIds) {
+			str += (str.equals("")? "" : "|") + id;
+		}
+		
+		return str;
+	}
+	
+	public String getQueryString() {
+		if (this.stuffIds == null) {
+			return null;
+		}
+		
+		Collections.sort(this.stuffIds, Collections.reverseOrder());
+		
+		String strJoin = "";
+		String strWhere = "";
+		int i = 0;
+		for(String id : this.stuffIds) {
+			strJoin += " join (select id_recipe from mst_recipe_stuff_mt where id_stuff = '" + id + "') a";
+			strJoin +=  String.valueOf(i);
+			strJoin += " on r.id = a";
+			strJoin += String.valueOf(i) + ".id_recipe";
+			if(i > 0) {
+				strWhere += " and a" +  String.valueOf(i-1) + ".id_recipe = a" + String.valueOf(i) + ".id_recipe";
+			}
+			i++;
+		}
+		
+		if(strWhere.length() == 0) {
+			strJoin = " where 1 = 0";
+		} else {
+			strJoin += " where 1 = 1 " + strWhere;			
+		}
+		
+		return strJoin;		
+	}
+	
+	public String getQueryStringJoin() {
+		if (this.stuffIds == null) {
+			return null;
+		}
+		
+		Collections.sort(this.stuffIds, Collections.reverseOrder());
+		
+		String strJoin = "";
+		int i = 0;
+		for(String id : this.stuffIds) {
+			strJoin += " join (select id_recipe from mst_recipe_stuff_mt where id_stuff = '" + id + "') a";
+			strJoin +=  String.valueOf(i);
+			strJoin += " on r.id = a";
+			strJoin += String.valueOf(i) + ".id_recipe";
+			i++;
+		}
+		
+		return strJoin;		
+	}	
+	
+	public String getQueryStringWhere() {
+		if (this.stuffIds == null) {
+			return null;
+		}
+		
+		Collections.sort(this.stuffIds, Collections.reverseOrder());
+		
+		String strWhere = "";
+		int i = 0;
+		for(String id : this.stuffIds) {
+			if(i > 0) {
+				strWhere += " and a" +  String.valueOf(i-1) + ".id_recipe = a" + String.valueOf(i) + ".id_recipe";
+			}
+			i++;
+		}
+		
+		if(strWhere.length() == 0) {
+			strWhere = " where 1 = 0";
+		} else {
+			strWhere = " where 1 = 1 " + strWhere;			
+		}
+		
+		return strWhere;		
+	}		
+	
+	public String getChefCode() {
+		return chefCode;
+	}
+	public void setChefCode(String chefCode) {
+		this.chefCode = chefCode;
+	}
+	public boolean getIsIncludedStaticInfo() {
+		return isIncludedStaticInfo;
+	}
+	public void setIsIncludedStaticInfo(boolean isIncludedStaticInfo) {
+		this.isIncludedStaticInfo = isIncludedStaticInfo;
+	}
+
+}

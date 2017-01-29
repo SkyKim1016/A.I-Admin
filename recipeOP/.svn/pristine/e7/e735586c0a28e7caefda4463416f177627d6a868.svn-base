@@ -1,0 +1,74 @@
+package com.onethefull.recipe.controller;
+
+import java.io.UnsupportedEncodingException;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.comm.service.UserService;
+import com.onethefull.recipe.comm.social.UserSocialConnection;
+import com.onethefull.recipe.req.UserServiceProviderInfoReq;
+
+@Controller
+@RequestMapping("/rapi/auth")
+public class AuthController extends BaseController {
+
+	private final static Logger logger = LoggerFactory.getLogger(AuthController.class);
+	
+	@Resource(name = "userService")
+	private UserService userService;
+	
+	@RequestMapping(value = "login/check", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData loginCheckByAuthToken(HttpServletRequest request) {
+		User user = this.getUser(request);
+		boolean isLogin = user != null;
+		
+		ResultWithData result = ResultWithData.succcessResult().addData("isLogin", isLogin);
+		
+		if(isLogin) {
+			result.addData("user", user);		
+		}
+		
+		return result;
+	}
+
+	@RequestMapping(value = "login",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData existsUser(HttpServletRequest request, @RequestBody UserServiceProviderInfoReq req) throws UnsupportedEncodingException {
+		req.setLanguageId(this.getLanguageId(request));
+		return userService.login(req);
+	}	
+	
+	@RequestMapping(value = "logout", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData login(HttpServletRequest request) {
+		String authToken = this.getAuthToken(request);
+		return userService.logout(authToken);
+	}
+
+	/*
+	@RequestMapping(value = "login", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData login(@RequestBody User user) {
+		return userService.login(user);
+	}
+	*/
+	
+	@RequestMapping(value = "login/sns", method = RequestMethod.POST)
+	@ResponseBody 
+	public ResultWithData loginSNS(HttpServletRequest request, @RequestBody UserServiceProviderInfoReq req) throws UnsupportedEncodingException {
+		req.setLanguageId(this.getLanguageId(request));
+		return userService.createSPUserByServiceProviderInfo(req);
+	}
+}

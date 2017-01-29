@@ -1,0 +1,154 @@
+package com.onethefull.recipe.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.comm.service.UserService;
+import com.onethefull.recipe.comm.social.UserSocialConnection;
+import com.onethefull.recipe.req.ModifyFavoriteStep1Req;
+import com.onethefull.recipe.req.UserReq;
+
+@Controller
+@RequestMapping("/rapi/user")
+public class UserController extends BaseController {
+
+	private final static Logger logger = LoggerFactory.getLogger(UserController.class);
+	
+	@Resource(name = "userService")
+	private UserService userService;
+	
+	@RequestMapping(value = "exists",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData existsUser(@RequestParam("lid") String lid) {
+		return userService.isExists(lid);
+	}
+	
+	@RequestMapping(value = "check/favorite/step1/list",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getFavoriteCheckRecipeList(HttpServletRequest request) {
+		User user = this.getUser(request);
+		
+		if (user == null) {
+			user = new User();
+		}
+
+		return userService.getFavoriteCheckRecipeList(user);
+	}
+	
+	@RequestMapping(value = "check/favorite/step2/list",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getFavoriteCheckOtherList(HttpServletRequest request) {
+		User user = this.getUser(request);
+		
+		if (user == null) {
+			user = new User();
+		}
+
+		return userService.getFavoriteCheckOtherList(user);
+	}
+	
+	@RequestMapping(value = "check/favorite/step1/set",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData modifyFavoriteStep1(HttpServletRequest request, @RequestBody ModifyFavoriteStep1Req req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setUserId(user.getId());
+		return userService.modifyFavoriteStep1(req);
+	}	
+	
+	@RequestMapping(value = "check/favorite/health/{healthId}/set",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData modifyCheckHealth(HttpServletRequest request, @PathVariable String healthId) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		return userService.modifyCheckHealth(user, healthId);
+	}
+	
+	@RequestMapping(value = "check/favorite/health/interest/{healthId}/set",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData modifyCheckInterestHealth(HttpServletRequest request, @PathVariable String healthId) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		return userService.modifyCheckInterestHealth(user, healthId);
+	}
+	
+	@RequestMapping(value = "check/favorite/job/{jobId}/set",method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData modifyCheckJob(HttpServletRequest request, @PathVariable String jobId) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		return userService.modifyCheckJob(user, jobId);
+	}	
+
+	@RequestMapping(value = "check/favorite/activitylevel/set",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData modifyFavoriteStep1(HttpServletRequest request, @RequestBody UserReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setId(user.getId());
+		
+		return userService.modifyCheckActivityLevel(req);
+	}	
+	
+	@RequestMapping(value = "check/favorite/agelevel/set",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData modifyAgeLevel(HttpServletRequest request, @RequestBody UserReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setId(user.getId());
+		
+		return userService.modifyAgeLevel(req);
+	}	
+		
+	// 회원 목록
+	@RequestMapping(value = "list",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getUserList(HttpServletRequest request, @RequestBody UserReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setOwnerId(user.getId());
+		
+		return userService.getUsers(req);
+	}	
+}

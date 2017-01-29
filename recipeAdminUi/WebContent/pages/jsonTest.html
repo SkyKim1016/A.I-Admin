@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" >
+<head>
+<title>Page Title</title>
+
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+<script src="js/app.js"></script>
+<script src="js/controllers.js"></script>
+<script src="js/service.js"></script>
+<script>
+ 	function PostsCtrlAjax($scope, $http)
+	{
+ 		/*
+			$http({method: 'POST', url: 'http://localhost:8080/recipe/rapi/admin/recipe'}).success(function(data)
+			{
+			$scope.posts = data; // response data 
+			});
+		*/
+		
+		$http({
+	    method: 'POST' ,
+	    url: 'http://localhost:8080/recipe/rapi/admin/recipe',
+	    data: $.param({
+	        "pageNum" : "1",
+	    }),
+	    body: {
+	        'Content-Type': 'application/json; charset=UTF-8'
+	    }
+	}).success(function(response) {
+	    console.log('Success');
+	}).finally(function() {
+	    console.log('Complete');
+	});
+	
+		
+	} 
+
+
+</script>
+</head>
+<body ng-app id="ng-app">
+<div id="ng-app" ng-app ng-controller="PostsCtrlAjax">
+ 
+<div ng-repeat="post in posts" >
+<h2>
+<!-- {{post.pageNum}}</a> -->
+</h2>
+</div>
+</div>
+</body>
+</html>

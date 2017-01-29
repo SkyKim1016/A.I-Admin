@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.ContentMapper">
+		
+	<select id="getAnnouncePageInfo" parameterType="com.onethefull.recipe.req.AnnounceReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(a.id) as itemSize,  ceiling(count(a.id) * 1.0 / ${pageSize}) as lastPageNum  
+		 from tbl_announce a
+		 join tbl_announce_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId} 
+	</select>
+
+	<select id="getAnnounceList" parameterType="com.onethefull.recipe.req.AnnounceReq" resultType="com.onethefull.recipe.vo.AnnounceVO">  
+		select a.id, a_l.title, a_l.content, DATE_FORMAT(a.reg_date, '%Y-%m-%d %H:%i:%s') as createDate, CASE WHEN datediff(now(), reg_date) <![CDATA[<]]> 7 then 'N' else '' end `status`
+		 from tbl_announce a
+		 join tbl_announce_ln a_l on a.id = a_l.id and a_l.id_language = #{languageId} 
+		 order by a.reg_date desc
+		 limit ${startNum}, ${pageSize}
+	</select>		
+		
+	
+</mapper>

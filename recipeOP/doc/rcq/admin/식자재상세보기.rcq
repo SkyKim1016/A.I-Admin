@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://104.155.225.112:8080/recipe/rapi/admin/stuff/201604280806242</URL><method>POST</method><headers><header key="auth_token" value="4f54be2b6e1bbd5eb8921bc5d8cb53a37129074a443cf756159e5201847245da"/></headers><body><string content-type="application/json" charset="UTF-8">{}</string></body></request></rest-client>

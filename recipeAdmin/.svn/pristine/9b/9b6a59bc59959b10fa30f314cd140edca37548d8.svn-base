@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  form(name="add-estimation", action="/login", method="post")
+    div.input
+      input(type="text", name="loginid")
+    div.input
+      input(type="password", name="password")
+    div.actions
+      input(type="submit", value="add")

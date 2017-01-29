@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.onethefull.recipe.mapper.FriendshipMapper">
+
+	<select id="getFriendsPageInfo" parameterType="com.onethefull.recipe.req.FriendshipReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(a.id) as itemSize,  ceiling(count(a.id) * 1.0 / ${pageSize}) as lastPageNum  
+		from (
+			select f.id_friend as id
+			  from mst_friendship f
+			<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+				join mst_user u on f.id_friend = u.id
+				<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+			   		and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+			    </if>
+				<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+					and (
+						u.name like CONCAT('%',#{keywordReq.keyValue},'%')
+					)
+				</if>
+			</if>
+			 where id_user = #{userId}
+			 
+			 union 
+			select r.id_user as id
+			  from tbl_friendship_request r
+			<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+				join mst_user u on r.id_user = u.id
+				<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+			   		and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+			    </if>
+				<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+					and (
+						u.name like CONCAT('%',#{keywordReq.keyValue},'%')
+					)
+				</if>
+			</if>			  
+			 where id_requester = #{userId}
+		 ) a
+	</select>
+
+	<select id="getFriends" parameterType="com.onethefull.recipe.req.FriendshipReq" resultType="com.onethefull.recipe.vo.FriendVO">  
+		select a.id, u.name, u.image_thumb_url as imageThumbUrl, u.image_original_url as imageOriginalUrl, a.createDate, a.`status`
+		from (
+			select f.id_friend as id, f.reg_date as createDate, 'FF' as `status`
+			  from mst_friendship f
+			<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+				join mst_user u on f.id_friend = u.id
+				<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+			   		and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+			    </if>
+				<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+					and (
+						u.name like CONCAT('%',#{keywordReq.keyValue},'%')
+					)
+				</if>
+			</if>
+			 where id_user = #{userId}
+			 
+			 union 
+			select r.id_user as id, r.reg_date as createDate, 'FR' as `status`
+			  from tbl_friendship_request r
+			<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+				join mst_user u on r.id_user = u.id
+				<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+			   		and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+			    </if>
+				<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+					and (
+						u.name like CONCAT('%',#{keywordReq.keyValue},'%')
+					)
+				</if>
+			</if>			  
+			 where id_requester = #{userId}
+		 ) a
+		 join mst_user u on a.id = u.id
+		 order by u.name
+		 limit ${startNum}, ${pageSize}
+	 
+	</select>
+	
+	<update id="actFriendship" parameterType="com.onethefull.recipe.req.FriendshipReq" statementType="CALLABLE">
+		{ CALL  sp_friendship_request(#{userId}, #{requesterId}, #{status.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+			
+	
+</mapper>

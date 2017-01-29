@@ -1,0 +1,335 @@
+package com.onethefull.recipe.comm.util;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.vo.UploadVO;
+
+public class RecipeParser {
+	Reader csvFileIn;
+	private Connection conn = null;
+	private Statement statement = null;
+	private PreparedStatement preparedStatement = null;
+	private ResultSet resultSet = null;
+
+	public RecipeParser() throws SQLException, ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
+		// Setup the connection with the DB
+		conn = DriverManager.getConnection("jdbc:mysql://104.155.225.112:3306/recipe_proto?" + "user=root&password=0412");
+
+		// Statements allow to issue SQL queries to the database
+		statement = conn.createStatement();
+	}
+	
+	public int insertMaster(InputStream csvInputStream) throws IOException, FileNotFoundException, SQLException {
+		return this.insertMaster(csvInputStream, null);
+	}
+
+	public int insertMaster(InputStream csvInputStream, UploadVO uploadVO)
+			throws IOException, FileNotFoundException, SQLException {
+		Iterable<CSVRecord> records;
+		records = CSVFormat.EXCEL.parse(new InputStreamReader(csvInputStream));
+		return insertMasterInDB(records, uploadVO);
+	}
+
+	public int insertMaster(String csvFilePath) throws IOException, FileNotFoundException, SQLException {
+		Iterable<CSVRecord> records;
+		records = CSVFormat.EXCEL.parse(new FileReader(csvFilePath));
+		return insertMasterInDB(records);
+	}
+
+	private int insertMasterInDB(Iterable<CSVRecord> records) throws SQLException {
+		return this.insertMasterInDB(records, null);
+	}
+
+	private int insertMasterInDB(Iterable<CSVRecord> records, UploadVO uploadVO) throws SQLException {
+		int result = ErrorCode.SUCCESS;
+		int iteration2 = 0;
+		int iteration3 = 0;
+		int iteration4 = 0;
+		int iteration5 = 0;
+
+		boolean newInteration2 = true;
+		boolean newInteration3 = true;
+		boolean newInteration4 = true;
+		boolean newInteration5 = true;
+
+		String recipeId = "n/a";
+		String recipeName = "n/a";
+		String recipeCategory = "n/a";
+		String recipeFileName = "n/a";
+
+		String o_new_id2 = null;
+		String o_new_id3 = null;
+		String o_new_id4 = null;
+
+		int o_seq2 = 0;
+		int o_seq3 = 0;
+		int o_seq4 = 0;
+
+		for (CSVRecord record : records) {
+			if (record.get(0).equals("1")) {
+				String cetegory = record.get(1);
+				String name = record.get(2);
+				int min = Integer.parseInt(record.get(3));
+				int cal = Integer.parseInt(record.get(4));
+				String url1 = record.get(5);
+				String url2 = record.get(6);
+				String info = record.get(7);
+				String memo = record.get(8);
+				int difficulty = Integer.parseInt(record.get(9));
+				String fileName = record.get(10);
+				String imageOriginalUrl = null;
+				String imageMiddleUrl = null;
+				String imageThumbnailUrl = null;
+				if (uploadVO != null) {
+					imageOriginalUrl = uploadVO.getImageOriginalPath();
+					imageMiddleUrl = uploadVO.getImageMiddlePath();
+					imageThumbnailUrl = uploadVO.getImageThumbPath();
+				}
+
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("cetegory : " + cetegory);
+				System.out.println("name : " + name);
+				System.out.println("min : " + min);
+				System.out.println("cal : " + cal);
+				System.out.println("url1 : " + url1);
+				System.out.println("url2 : " + url2);
+				System.out.println("imageOriginalUrl : " + imageOriginalUrl);
+				System.out.println("imageMiddleUrl : " + imageMiddleUrl);
+				System.out.println("imageThumbnailUrl : " + imageThumbnailUrl);
+				System.out.println("info : " + info);
+				System.out.println("memo : " + memo);
+				System.out.println("difficulty : " + difficulty);
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("-------------------------------------");
+
+				preparedStatement = conn.prepareStatement("SELECT count(id) FROM recipe_proto.mst_recipe WHERE check_info = ?");
+				preparedStatement.setString(1, fileName);
+				resultSet = preparedStatement.executeQuery();
+
+				boolean isExistForRecipe = false;
+				while(resultSet.next()){     
+					isExistForRecipe = resultSet.getInt(1) > 0 ? true : false;
+				}
+				
+				if(isExistForRecipe) {
+					result = ErrorCode.ALREADY_EXIST;
+					break;
+				}
+				
+				CallableStatement proc = conn
+						.prepareCall("call sp_recipe_master(null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'I', ?, ?); ");
+
+				proc.setString(1, cetegory);
+				proc.setString(2, name);
+				proc.setInt(3, min);
+				proc.setInt(4, cal);
+				proc.setString(5, url1);
+				proc.setString(6, imageOriginalUrl);
+				proc.setString(7, imageThumbnailUrl);
+				proc.setString(8, url2);
+				proc.setString(9, info);
+				proc.setString(10, memo);
+				proc.setInt(11, difficulty);
+				proc.setString(12, fileName);
+
+				proc.registerOutParameter(13, Types.VARCHAR);
+				proc.registerOutParameter(14, Types.INTEGER);
+				
+				recipeName = name;
+				recipeCategory = cetegory;
+				recipeFileName = fileName;
+
+				proc.execute();
+				recipeId = proc.getString(13);
+				if(proc.getInt(14) != 0) {
+					result = ErrorCode.FILE_WRITE_ERROR;
+					break;
+				}
+
+			} else if (record.get(0).equals("2")) {
+				if (iteration2 == 0) {
+					iteration2 = 2;
+					newInteration2 = true;
+				} else
+					newInteration2 = false;
+
+				String ingriName = record.get(1);
+				String ingriQuantity = record.get(2);
+
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("ingriName : " + ingriName);
+				System.out.println("ingriQuantity : " + ingriQuantity);
+				System.out.println("-------------------------------------");
+
+				CallableStatement proc = null;
+
+				if (newInteration2) {
+					proc = conn.prepareCall("call sp_recipe_stuff_master(null, 0, ?, ?, ?, 'I', ?, ?, ?);");
+					proc.setString(1, recipeId);
+					proc.setString(2, ingriName);
+					proc.setString(3, ingriQuantity);
+					proc.registerOutParameter(4, Types.VARCHAR);
+					proc.registerOutParameter(5, Types.INTEGER);
+
+					proc.execute();
+					o_new_id2 = proc.getString(4);
+					o_seq2 = proc.getInt(5);
+				} else {
+					proc = conn.prepareCall("call sp_recipe_stuff_master(?, ?, ?, ?, ?, 'I', ?, ?, ?);");
+					proc.setString(1, o_new_id2);
+					proc.setInt(2, o_seq2);
+					proc.setString(3, recipeId);
+					proc.setString(4, ingriName);
+					proc.setString(5, ingriQuantity);
+					proc.registerOutParameter(6, Types.VARCHAR);
+					proc.registerOutParameter(7, Types.INTEGER);
+
+					proc.execute();
+					o_new_id2 = proc.getString(6);
+					o_seq2 = proc.getInt(7);
+				}
+			} else if (record.get(0).equals("3")) {
+				iteration2 = 0;
+				if (iteration3 == 0) {
+					iteration3 = 3;
+					newInteration3 = true;
+				} else
+					newInteration3 = false;
+
+				String nutritionName = record.get(1);
+				String nutritionQuntity = record.get(2);
+
+				CallableStatement proc = null;
+
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("nutritionName : " + nutritionName);
+				System.out.println("nutritionQuntity : " + nutritionQuntity);
+				System.out.println("-------------------------------------");
+
+				if (newInteration3) {
+					proc = conn.prepareCall("call sp_recipe_nutrient_master(null, 0, ?, ?, ?, 'I', ?, ?, ?); ");
+					proc.setString(1, recipeId);
+					proc.setString(2, nutritionName);
+					proc.setString(3, nutritionQuntity);
+					proc.registerOutParameter(4, Types.VARCHAR);
+					proc.registerOutParameter(5, Types.INTEGER);
+
+					proc.execute();
+					o_new_id3 = proc.getString(4);
+					o_seq3 = proc.getInt(5);
+				} else {
+					proc = conn.prepareCall("call sp_recipe_nutrient_master(?, ?, ?, ?, ?, 'I', ?, ?, ?); ");
+					proc.setString(1, o_new_id3);
+					proc.setInt(2, o_seq3);
+					proc.setString(3, recipeId);
+					proc.setString(4, nutritionName);
+					proc.setString(5, nutritionQuntity);
+					proc.registerOutParameter(6, Types.VARCHAR);
+					proc.registerOutParameter(7, Types.INTEGER);
+					proc.execute();
+					o_new_id3 = proc.getString(6);
+					o_seq3 = proc.getInt(7);
+				}
+			} else if (record.get(0).equals("4")) {
+				iteration3 = 0;
+				if (iteration4 == 0) {
+					iteration4 = 4;
+					newInteration4 = true;
+				} else
+					newInteration4 = false;
+
+				String step = record.get(1);
+
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("step : " + step);
+				System.out.println("-------------------------------------");
+
+				CallableStatement proc = null;
+				if (newInteration4) {
+					proc = conn.prepareCall("call sp_recipe_process_master(null, 0, ?, ?, 'I', ?, ?, ?); ");
+					proc.setString(1, recipeId);
+					proc.setString(2, step);
+					proc.registerOutParameter(3, Types.VARCHAR);
+					proc.registerOutParameter(4, Types.INTEGER);
+
+					proc.execute();
+
+					o_new_id4 = proc.getString(3);
+					o_seq4 = proc.getInt(4);
+				} else {
+					proc = conn.prepareCall("call sp_recipe_process_master(?, ?, ?, ?, 'I', ?, ?, ?); ");
+					proc.setString(1, o_new_id4);
+					proc.setInt(2, o_seq4);
+					proc.setString(3, recipeId);
+					proc.setString(4, step);
+					proc.registerOutParameter(5, Types.VARCHAR);
+					proc.registerOutParameter(6, Types.INTEGER);
+
+					proc.execute();
+
+					o_new_id4 = proc.getString(5);
+					o_seq4 = proc.getInt(6);
+				}
+			} else if (record.get(0).equals("5")) {
+				iteration4 = 0;
+				if (iteration5 == 0) {
+					iteration5 = 5;
+					newInteration5 = true;
+				} else
+					newInteration5 = false;
+
+				String chunk1 = record.get(1);
+				String chunk2 = record.get(2);
+				String chunk3 = record.get(3);
+
+				System.out.println("recipeName : " + recipeName);
+				System.out.println("recipeCategory : " + recipeCategory);
+				System.out.println("recipeId : " + recipeId);
+				System.out.println("chunk1 : " + chunk1);
+				System.out.println("chunk2 : " + chunk2);
+				System.out.println("chunk3 : " + chunk3);
+				System.out.println("recipeFileName : " + recipeFileName);
+				System.out.println("-------------------------------------");
+
+				CallableStatement proc = null;
+				if (newInteration5)
+					proc = conn.prepareCall("call sp_recipe_stuff_chunking(?, ?, ?, 0, ?, ?, ?, ?, 'I', ?, ?); ");
+				else
+					proc = conn.prepareCall("call sp_recipe_stuff_chunking(?, ?, ?, 1, ?, ?, ?, ?, 'I', ?, ?); ");
+
+				proc.setString(1, recipeName);
+				proc.setString(2, recipeCategory);
+				proc.setString(3, recipeId);
+				proc.setString(4, chunk1);
+				proc.setString(5, chunk2);
+				proc.setString(6, chunk3);
+				proc.setString(7, recipeFileName);
+				proc.execute();
+
+			}
+		}
+		conn.close();
+		System.out.println("-----------------END--------------------");
+		System.out.println("----------------------------------------");
+		return result;
+	}
+
+}

@@ -1,0 +1,61 @@
+package com.onethefull.recipe.res;
+
+
+public class RecipeDetailStuff {
+	private String stuffId;
+	private String stuffName;
+	private String quantityInfo;
+	private String substitute;
+	private String expirationDate;
+	private String userId;
+	
+	public RecipeDetailStuff() {}
+	
+	public String getStuffId() {
+		return stuffId;
+	}
+	public void setStuffId(String stuffId) {
+		this.stuffId = stuffId;
+	}
+	public String getStuffName() {
+		return stuffName;
+	}
+	public void setStuffName(String stuffName) {
+		this.stuffName = stuffName;
+	}
+	public String getQuantityInfo() {
+		return quantityInfo;
+	}
+	public void setQuantityInfo(String quantityInfo) {
+		this.quantityInfo = quantityInfo;
+	}
+
+	public boolean getIsInsufficient() {
+		return this.userId != null && this.expirationDate == null;
+	}
+
+	public String getSubstitute() {
+		return substitute;
+	}
+
+	public void setSubstitute(String substitute) {
+		this.substitute = substitute;
+	}
+
+	public String getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(String expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	
+}

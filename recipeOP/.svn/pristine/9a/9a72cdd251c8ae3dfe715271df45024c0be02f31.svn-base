@@ -1,0 +1,33 @@
+package com.onethefull.recipe.service;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.req.RecipeSetReq;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+
+@Service("mainService")
+public class MainService {
+
+	@Value("#{serverProperty['domain.url']}")
+	private String domainUrl;
+	
+	@Resource(name = "recipeSetService")
+	private RecipeSetService recipeSetService;
+	
+	public ResultWithData getRecommendRecipes(RecipeSetReq req) {
+		
+		// 임시. 추천 로직 수정한 후 정상 서비스 예정
+		// 창작 요리는 저장 체계로 수정한 정상 서비스 예정
+		RcmdRecipeVO rcmdRecipe = recipeSetService.getRecipeIdbyPMI(req);
+		RcmdRecipeVO rcmdFood = recipeSetService.getRecipeIdbyPMI(req);
+		
+		return ResultWithData.succcessResult().addData("recipe", rcmdRecipe).addData("food", rcmdFood);
+	}
+	
+	
+
+}

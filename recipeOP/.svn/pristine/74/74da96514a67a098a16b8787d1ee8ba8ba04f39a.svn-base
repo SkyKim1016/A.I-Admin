@@ -1,0 +1,91 @@
+package com.onethefull.recipe.comm.service;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.UserSimple;
+import com.onethefull.recipe.comm.vo.PageInfoVO;
+import com.onethefull.recipe.mapper.FriendshipMapper;
+import com.onethefull.recipe.req.FriendshipReq;
+import com.onethefull.recipe.req.KeywordReq;
+import com.onethefull.recipe.vo.FriendVO;
+
+@Service("friendshipService")
+public class FriendshipService {
+	
+	@Resource(name = "friendshipMapper")
+	private FriendshipMapper friendshipMapper;
+	
+	public ResultWithData getFriends(FriendshipReq req) {
+		
+		// 키워드 검색 
+		KeywordReq tmpKeywordReq = req.getKeywordReq();
+		KeywordReq keywordReq = this.setKeywordReq(req.getKeywordReq());
+		if(keywordReq != null) {
+			req.setKeywordReq(keywordReq);			
+		}
+		
+		ResultWithData result = ResultWithData.succcessResult();
+		PageInfoVO pageInfo = friendshipMapper.getFriendsPageInfo(req);
+		pageInfo.setCurrentPageNum(req.getPageNum());
+		pageInfo.setPageSize(req.getPageSize());
+		result.addData("pageInfo", pageInfo);
+		List<FriendVO> list = friendshipMapper.getFriends(req);
+				
+		//추가된 요청 정보 다시 초기화
+		req.setKeywordReq(tmpKeywordReq);
+				
+		return ResultWithData.succcessResult().addData("pageInfo", pageInfo).addData("list", list).addData("req", req);		
+
+	}	
+	
+	protected KeywordReq setKeywordReq(KeywordReq keyReq) {
+		if(keyReq == null) return null;
+		
+		KeywordReq keywordReq = new KeywordReq(keyReq.getKeyVar(), keyReq.getKeyValue());
+
+		if(keywordReq.getKeyVar() != null && keywordReq.getKeyVar().toUpperCase().equals("ALL")) {
+			keywordReq.setKeyCol(null);
+			keywordReq.setKeyType("string");
+		} else if(keywordReq.getKeyVar() != null && keywordReq.getKeyVar().toUpperCase().equals("NAME")) {
+			keywordReq.setKeyCol("u.name");
+			keywordReq.setKeyType("string");
+		} else if(keywordReq.getKeyVar() != null && keywordReq.getKeyVar().toUpperCase().equals("EMAIL")) {
+			keywordReq.setKeyCol("u.loginid");  //***** email 항목 추가
+			keywordReq.setKeyType("string");
+		} 
+		return keywordReq;
+	}
+	
+	public ResultWithData actFriendship(FriendshipReq req) {
+		try {
+			friendshipMapper.actFriendship(req);	
+		} catch (Exception e) {
+			return  ResultWithData.failuerResult();
+		}
+		
+		String message = "";
+		if(req.getResultCode() == ErrorCode.FRIENDSHIP_ALREADY_SETUP) {
+			message = "he(she) is already your friend";
+		} else if(req.getResultCode() == ErrorCode.FRIENDSHIP_ALREADY_ON_REQUESTING) {
+			message = "request for friendship is already on going";			
+		} else if(req.getResultCode() == ErrorCode.FRIENDSHIP_ALREADY_SETUP_ON_REJECT) {
+			message = "reject is invalid, he(she) is already your friend.";
+		} else if(req.getResultCode() == ErrorCode.FRIENDSHIP_ALREADY_SETUP_ON_CANCEL) {
+			message = "cancel is invalid, he(she) is already your friend";
+		} else if(req.getResultCode() != 0 )  {
+			message = "DB or Networ error";
+		}
+		
+		if(!message.isEmpty()) {
+			return ResultWithData.failuerResult().setCode(req.getResultCode()).setMessage(message);
+		}
+		
+		return ResultWithData.succcessResult().addData("req", req);
+	}	
+}

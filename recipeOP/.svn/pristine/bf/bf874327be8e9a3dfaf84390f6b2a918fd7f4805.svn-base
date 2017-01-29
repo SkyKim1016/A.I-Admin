@@ -1,0 +1,17 @@
+package com.onethefull.recipe.req;
+
+
+public class AiRecipeDetailReq extends RecipeSetReq {
+	private AIRecipeSurpriseLevel aiSurpriseLevel = AIRecipeSurpriseLevel.defaultAIRecipeSurpriseLevel();
+
+	public AiRecipeDetailReq(){}
+	public AiRecipeDetailReq(String recipeId, String userId) {
+		super(recipeId, userId);
+	}
+	public AIRecipeSurpriseLevel getAiSurpriseLevel() {
+		return aiSurpriseLevel;
+	}
+	public void setAiSurpriseLevel(AIRecipeSurpriseLevel aiSurpriseLevel) {
+		this.aiSurpriseLevel = aiSurpriseLevel;
+	}
+}

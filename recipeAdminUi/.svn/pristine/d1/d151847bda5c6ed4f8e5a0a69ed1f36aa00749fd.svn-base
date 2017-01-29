@@ -1,0 +1,293 @@
+Searching 742 files for "SB Admin"
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\index.html:
+    3  <head>
+    4  <meta http-equiv="refresh" content="0;url=pages/index.html">
+    5: <title>SB Admin 2</title>
+    6  <script language="javascript">
+    7      window.location.href = "pages/index.html"
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\README.md:
+    1: # [Start Bootstrap](http://startbootstrap.com/) - [SB Admin 2](http://startbootstrap.com/template-overviews/sb-admin-2/)
+    2  
+    3: [SB Admin 2](http://startbootstrap.com/template-overviews/sb-admin-2/) is an open source, admin dashboard template for [Bootstrap](http://getbootstrap.com/) created by [Start Bootstrap](http://startbootstrap.com/).
+    4  
+    5  ## Getting Started
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\dist\css\sb-admin-2.css:
+    1  /*!
+    2:  * Start Bootstrap - SB Admin 2 Bootstrap Admin Theme (http://startbootstrap.com)
+    3   * Code licensed under the Apache License v2.0.
+    4   * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\blank.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\buttons.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   49                      <span class="icon-bar"></span>
+   50                  </button>
+   51:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   52              </div>
+   53              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\flot.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+   ..
+  470                          <!-- /.panel-heading -->
+  471                          <div class="panel-body">
+  472:                             <p>Flot is a pure JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks, and interactive features. In SB Admin, we are using the most recent version of Flot along with a few plugins to enhance the user experience. The Flot plugins being used are the tooltip plugin for hoverable tooltips, and the resize plugin for fully responsive charts. The documentation for Flot Charts is available on their website, <a target="_blank" href="http://www.flotcharts.org/">http://www.flotcharts.org/</a>.</p>
+  473                              <a target="_blank" class="btn btn-default btn-lg btn-block" href="http://www.flotcharts.org/">View Flot Charts Documentation</a>
+  474                          </div>
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\forms.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\grid.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\icons.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46              <span class="icon-bar"></span>
+   47          </button>
+   48:         <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49      </div>
+   50      <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\index.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\login.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\morris.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   49                      <span class="icon-bar"></span>
+   50                  </button>
+   51:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   52              </div>
+   53              <!-- /.navbar-header -->
+   ..
+  443                          <!-- /.panel-heading -->
+  444                          <div class="panel-body">
+  445:                             <p>Morris.js is a jQuery based charting plugin created by Olly Smith. In SB Admin, we are using the most recent version of Morris.js which includes the resize function, which makes the charts fully responsive. The documentation for Morris.js is available on their website, <a target="_blank" href="http://morrisjs.github.io/morris.js/">http://morrisjs.github.io/morris.js/</a>.</p>
+  446                              <a target="_blank" class="btn btn-default btn-lg btn-block" href="http://morrisjs.github.io/morris.js/">View Morris.js Documentation</a>
+  447                          </div>
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\notifications.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\panels-wells.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\tables.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+   ..
+  808                              <div class="well">
+  809                                  <h4>DataTables Usage Information</h4>
+  810:                                 <p>DataTables is a very flexible, advanced tables plugin for jQuery. In SB Admin, we are using a specialized version of DataTables built for Bootstrap 3. We have also customized the table headings to use Font Awesome icons in place of images. For complete documentation on DataTables, visit their website at <a target="_blank" href="https://datatables.net/">https://datatables.net/</a>.</p>
+  811                                  <a class="btn btn-default btn-lg btn-block" target="_blank" href="https://datatables.net/">View DataTables Documentation</a>
+  812                              </div>
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\typography.html:
+   10      <meta name="author" content="">
+   11  
+   12:     <title>SB Admin 2 - Bootstrap Admin Theme</title>
+   13  
+   14      <!-- Bootstrap Core CSS -->
+   ..
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+32 matches across 16 files
+
+
+Searching 742 files for "(주)원더풀 플랫폼 "
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\blank.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\buttons.html:
+   49                      <span class="icon-bar"></span>
+   50                  </button>
+   51:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   52              </div>
+   53              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\flot.html:
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\forms.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\grid.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\icons.html:
+   46              <span class="icon-bar"></span>
+   47          </button>
+   48:         <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49      </div>
+   50      <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\index.html:
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\morris.html:
+   49                      <span class="icon-bar"></span>
+   50                  </button>
+   51:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   52              </div>
+   53              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\notifications.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\panels-wells.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\tables.html:
+   52                      <span class="icon-bar"></span>
+   53                  </button>
+   54:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   55              </div>
+   56              <!-- /.navbar-header -->
+
+C:\Users\개발\Downloads\startbootstrap-sb-admin-2-1.0.8\startbootstrap-sb-admin-2-1.0.8\pages\typography.html:
+   46                      <span class="icon-bar"></span>
+   47                  </button>
+   48:                 <a class="navbar-brand" href="index.html">(주)원더풀 플랫폼 </a>
+   49              </div>
+   50              <!-- /.navbar-header -->
+
+12 matches across 12 files

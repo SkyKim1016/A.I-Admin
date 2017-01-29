@@ -1,0 +1,50 @@
+package com.onethefull.recipe.mapper;
+
+import java.util.List;
+
+import org.springframework.stereotype.Repository;
+
+import com.onethefull.recipe.comm.vo.PageInfoVO;
+import com.onethefull.recipe.req.AIRecipeReq;
+import com.onethefull.recipe.req.AIRecipeSeqReq;
+import com.onethefull.recipe.req.AiRecipeDetailReq;
+import com.onethefull.recipe.req.RcmdRecipeReq;
+import com.onethefull.recipe.req.RecipeSetReq;
+import com.onethefull.recipe.req.UserMealReq;
+import com.onethefull.recipe.vo.AiRecipeIngriVO;
+import com.onethefull.recipe.vo.AiRecipePhaseVO;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+import com.onethefull.recipe.vo.RcmdStuffOwningVO;
+import com.onethefull.recipe.vo.RcmdStuffPMIVO;
+import com.onethefull.recipe.vo.RecipeStuffVO;
+import com.onethefull.recipe.vo.StatisticMealofUserVO;
+
+@Repository("rcmdMapper")
+public interface RcmdMapper {
+	
+	public PageInfoVO getRecommendRecipiesPageInfo(RcmdRecipeReq req);
+	public List<RcmdRecipeVO> getRecommendRecipies(RcmdRecipeReq req); 
+	public RcmdRecipeVO getRecommendRecipiesChef(RcmdRecipeReq req); 
+	public List<RcmdRecipeVO> getRecommendRecipiesforHealth(RcmdRecipeReq req); 
+	public List<RcmdStuffOwningVO> getUserStuffs(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getStuffsPMI1Var(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getStuffsPMI2Var(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getStuffsPMI3Var(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getStuffsPMI4Var(RcmdRecipeReq req);
+	public StatisticMealofUserVO getStatisticMealofUser(UserMealReq req);
+	public List<RecipeStuffVO> getStuffsofRecipe(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getAdditionalStuffsforRecommend(RcmdRecipeReq req);
+	public List<RcmdStuffPMIVO> getRecommendStuffsforTaste(RecipeSetReq req);
+	public List<RcmdStuffPMIVO> getRecommendStuffsforTasteSub(RecipeSetReq req);
+	public List<RcmdRecipeVO> getRecommendStuffsforTasteSubCreate(RecipeSetReq req);
+	public int setNewRecommendStuffs(RcmdRecipeReq req);
+	public List<AiRecipeIngriVO> getPhaseBySeq(AIRecipeSeqReq aiRSeqReq);
+	public List<AiRecipePhaseVO> getPhaseList(AIRecipeReq aiRecipeReq);
+	public List<RcmdStuffPMIVO> getRecommendStuffsbyPMI(RecipeSetReq req);
+	public RcmdRecipeVO getRecommendRecipebyPopular(RecipeSetReq req);
+	public RcmdRecipeVO getRecommendRecipebyTaste(RecipeSetReq req);
+	public RcmdRecipeVO getRecommendRecipebyHealth(RecipeSetReq req);
+	public int createAIRecipe(AiRecipeDetailReq req);
+	public List<RcmdStuffPMIVO> getStuffsPMI1Var2(AiRecipeDetailReq req);
+	
+}

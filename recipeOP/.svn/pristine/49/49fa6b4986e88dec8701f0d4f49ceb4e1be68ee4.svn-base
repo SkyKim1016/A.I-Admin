@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:8080/recipe/rapi/auth/login/sns</URL><method>POST</method><body><string content-type="application/json" charset="UTF-8">{"userInfo":{"loginId":"birdi88@naver.com","name":"예성영"},
+"socialConnectionInfo":{"providerId":"facebook","providerUserId":"100002339586665",
+  "profileUrl":"http://facebook.com/profile.php?id=100002339586665",
+  "imageUrl":"http://graph.facebook.com/v1.0/100002339586665/picture",
+  "accessToken":"CAAFpAC6nHmwBAPWZBoxnS4kV6p9wt2ozNaLr2FdPV74TWIbXacz2RrCyxDdIHxmGTo96V1TAb9akXZCVCoVUUAuesCBuNfwI08OjT4YkD1JYAhekBtj8e7Vi5H6dATV7sZBKqVC5iWeEPIus1UHuibZASWy1kZCZAvIKp9N2ZCVMZA29MAJcW4CZCSCLApmCiRO99jF9uERIfQ3P4j2d5SDLp"},
+"userDeviceInfo":{"deviceType":"ANDROID","token":"asdfasd324123swerwe"}
+}</string></body></request></rest-client>

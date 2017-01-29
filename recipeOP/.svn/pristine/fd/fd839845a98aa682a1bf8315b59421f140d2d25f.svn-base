@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.6"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:9080/recipe/rapi/recipe/fridgeIngr</URL><method>GET</method><headers><header key="auth_token" value="a32277d94f32b94714ee0b0486dbcb6beebe02523ce7b045b029b3813bbe1658"/></headers><body><string content-type="application/json" charset="UTF-8">{"ingredientName":"계란","ingredientId":"201605292349174"}</string></body></request></rest-client>

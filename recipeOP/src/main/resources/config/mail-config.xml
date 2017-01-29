@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+
+	<context:component-scan base-package="com.onethefull.recipe.comm.service" />
+	
+	<bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="#{mailProperty['mail.host']}" />
+		<property name="port" value="#{mailProperty['mail.port']}" />
+		<property name="username" value="#{mailProperty['mail.username']}" />
+		<property name="password" value="#{mailProperty['mail.password']}" />
+		<property name="defaultEncoding" value="#{mailProperty['mail.encoding']}" />
+		<property name="javaMailProperties">
+			<props>
+				<!-- Use SMTP transport protocol -->
+				<prop key="mail.transport.protocol">smtp</prop>
+				<!-- Use SMTP-AUTH to authenticate to SMTP server -->
+				<prop key="mail.smtp.auth">true</prop>
+				<!-- Use TLS to encrypt communication with SMTP server -->
+<!-- 				<prop key="mail.smtp.starttls.enable">true</prop> -->
+				<!-- Use SSL to encrypt communication with SMTP server -->
+				<prop key="mail.smtp.ssl.enable">true</prop>
+				<prop key="mail.debug">true</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

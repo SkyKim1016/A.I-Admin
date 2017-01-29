@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.RecipeMapper">
+	<select id="getRecipeDetailMaster" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeMasterVO">  
+
+		select id as recipeId, id_category as categoryId, name as recipeName, cook_time as cookingTime, 
+		calorie, image_url as imageUrl, refered_url as referedUrl, storage_info as storageInfo, memo, cook_difficulty as cookDifficulty
+		from mst_recipe
+		where id = #{recipeId}
+
+	</select>
+	
+	<select id="getRecipeStuffs" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailStuff">  
+
+		select m.id_stuff as stuffId, s.name as stuffName, m.quantity_info as quantityInfo
+		<if test="userId !=null and userId != ''">
+		, max(h.expiration_date) as expirationDate, h.id_user as userId
+		</if>
+		from mst_recipe_stuff m
+		join mst_stuff s on m.id_stuff = s.id
+		<if test="userId !=null and userId != ''">
+		left join mst_user_stuff_having h on m.id_stuff = h.id_stuff and h.expiration_date > now() and h.id_user = #{userId}
+		</if>
+		where m.id_recipe = #{recipeId}
+		<if test="userId !=null and userId != ''">
+			group by stuffId, stuffName, quantityInfo
+		</if>
+		
+	</select>
+
+	<select id="getRecipeNutrients" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailNutrient">  
+
+		select m.id_nutrient as nutrientId, n.name as stuffName, m.quantity_info as quantityInfo
+		from mst_recipe_nutrient m
+		join mst_nutrient n on m.id_nutrient = n.id
+		where id_recipe = #{recipeId}
+
+	</select>
+
+	<select id="getRecipeProcesses" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailProcess">  
+
+		select seq, process_info as description
+		from mst_recipe_process
+		where id_recipe = #{recipeId}
+		order by seq;
+
+	</select>
+	
+	<select id="getFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" resultType="com.onethefull.recipe.vo.FridgeIngrVO">
+	<!-- 
+		SELECT id_stuff AS ingredientId, sum(h.qty) as qty, h.unit, min(h.expiration_date) AS expirationDate,
+    		   s.name AS ingredientName, s.id_category AS ingrCategoryId, c.name AS ingrCategoryName,
+    		   c.image_url AS ingrCategoryImageUrl, s.expiration_term AS ingredientDday, s.image_url AS ingredientImageUrl,
+    		   CASE
+					WHEN datediff(h.expiration_date, now()) <![CDATA[<]]> 0
+			        THEN 'EXPIRED'
+					WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 1
+			        THEN 'DANGER'
+			        WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 3
+			        THEN 'WARNING'
+			        ELSE 'NORMAL'
+			   END as expStatus
+		FROM mst_user_stuff_having h JOIN mst_stuff s ON h.id_stuff = s.id
+        LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		WHERE h.id_user = #{userId}
+		GROUP BY id_stuff, s.name, s.id_category, c.name, c.image_url, s.expiration_term, h.unit, s.image_url
+		ORDER BY ingrCategoryName , ingredientName
+	-->
+		SELECT id_stuff AS ingredientId, qty, h.unit, h.expiration_date AS expirationDate,
+   		   s.name AS ingredientName, s.id_category AS ingrCategoryId, c.name AS ingrCategoryName,
+   		   c.image_url AS ingrCategoryImageUrl, s.image_url AS ingredientImageUrl,
+   		   datediff(h.expiration_date, now()) as ingredientDday,
+   		   CASE
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<]]> 0
+		        THEN 'EXPIRED'
+				WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 1
+		        THEN 'DANGER'
+		        WHEN datediff(h.expiration_date, now()) <![CDATA[<=]]> 3
+		        THEN 'WARNING'
+		        ELSE 'NORMAL'
+		   END as expStatus
+		FROM mst_user_stuff_having h JOIN mst_stuff s ON h.id_stuff = s.id
+        LEFT JOIN mst_category_stuff c ON s.id_category = c.id
+		WHERE h.id_user = #{userId}
+		ORDER BY ingredientName, expirationDate
+	</select>
+	
+	<update id="updateFridgeIngr" parameterType="com.onethefull.recipe.req.FridgeIngrReq" statementType="CALLABLE">
+		{ CALL sp_user_stuff_having_master(#{userId}, #{ingredientName}, #{ingredientQnt}, null, #{ingredientDday}, #{type.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<select id="getCheckFavoriteRecipeList" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeforFavoriteCheckVO">  
+
+		select a.id, a.name, 
+		<if test="userId !=null and userId != ''">
+			m.priority
+			from mst_user_favorite_check_recipe_list m
+			join mst_favorite_check_recipe_list a on m.id_check = a.id and a.status = 'A'
+			where m.id_user = #{userId}
+			order by m.priority
+			
+		</if>
+		<if test="userId ==null or userId == ''">
+			a.priority
+			from mst_favorite_check_recipe_list a
+			where a.status = 'A'
+			order by a.priority
+			
+		</if>
+		
+	</select>	
+	
+	
+</mapper>

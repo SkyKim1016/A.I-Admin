@@ -1,0 +1,91 @@
+package com.onethefull.recipe.res;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.onethefull.recipe.type.RecommendType;
+
+
+public class RcmdRecipeBase {
+	private String recipeId;
+	private String recipeName;
+	private String recipeImageUrl;	
+	private String recipeImageOriginalUrl;	
+	private String recipeImageThumbUrl;	
+	private String recipeBaseOn;
+	private String categoryName;
+	
+	public RcmdRecipeBase() {
+		
+	}
+
+	public String getRecipeId() {
+		return recipeId;
+	}
+
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+
+	public String getRecipeName() {
+		return recipeName;
+	}
+
+	public void setRecipeName(String recipeName) {
+		this.recipeName = recipeName;
+	}
+
+	public String getRecipeImageUrl() {
+		return recipeImageUrl;
+	}
+
+	public void setRecipeImageUrl(String recipeImageUrl) {
+		this.recipeImageUrl = recipeImageUrl;
+	}
+
+	public String getRecipeImageOriginalUrl() {
+		return recipeImageOriginalUrl;
+	}
+
+	public void setRecipeImageOriginalUrl(String recipeImageOriginalUrl) {
+		this.recipeImageOriginalUrl = recipeImageOriginalUrl;
+	}
+
+	public String getRecipeImageThumbUrl() {
+		return recipeImageThumbUrl;
+	}
+
+	public void setRecipeImageThumbUrl(String recipeImageThumbUrl) {
+		this.recipeImageThumbUrl = recipeImageThumbUrl;
+	}
+
+	public String getRecipeBaseOn() {
+		return recipeBaseOn;
+	}
+
+	public void setRecipeBaseOn(String recipeBaseOn) {
+		this.recipeBaseOn = recipeBaseOn;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+	
+	public List<RecommendType> getRecommendType() {
+		List<RecommendType> list = new ArrayList<RecommendType>();
+		
+		int random = (int) (Math.random() * 30);
+		if(random % 5 == 0) list.add(RecommendType.CREATED);
+		if(random % 3 == 0) list.add(RecommendType.HEALTH);
+		if(random % 6 == 0) list.add(RecommendType.POPULAR);
+		list.add(RecommendType.TASTE);
+		
+		
+		return list;
+	}
+
+}

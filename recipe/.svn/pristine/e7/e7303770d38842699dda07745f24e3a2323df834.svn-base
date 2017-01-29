@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.UserAuthMapper">
+	<select id="getUserbyAuthToken" parameterType="com.onethefull.recipe.comm.auth.User" resultType="com.onethefull.recipe.comm.auth.User">
+			select a.id, b.loginid as loginId, b.userid as email, a.token as authToken, b.name, b.gender, b.mobile
+			  from mst_user_session a, 
+			       mst_user b
+			where a.id = b.id
+		 	and a.token = #{authToken}
+	</select>
+	
+	<select id="findUserbyIdPassword" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE 1 = 1
+		 <if test="id != null and id != ''">
+		 	and id = #{id}
+		 </if>
+		 <if test="loginId != null and loginId != ''">
+		 	and loginId = #{loginId}
+		 </if>
+		 <if test="password != null and password != ''">
+		 	and password = #{password}
+		 </if>
+	</select>
+	
+	<update id="setAuthToken" parameterType="com.onethefull.recipe.req.AuthTokenReq" statementType="CALLABLE">
+		{ CALL usp_user_auth_token_master(#{userId}, #{authToken}, #{tokenActionType}, #{custName, mode=OUT, jdbcType=VARCHAR}, #{newAuthToken, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC}, #{resultMessage, mode=OUT, jdbcType=VARCHAR}) }
+	</update>
+	
+	<update id="setUserDeviceInfo" parameterType="com.onethefull.recipe.req.UserDeviceReq" statementType="CALLABLE">
+		{ CALL  sp_user_device_register(#{userId}, #{deviceType}, #{token}, #{userId, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+    
+	<update id="setUserServiceProviderInfo" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" statementType="CALLABLE">
+		{ CALL  sp_user_social_connect_register(#{socialConnectionInfo.providerId}, #{socialConnectionInfo.providerUserId}, 
+		#{socialConnectionInfo.profileUrl}, #{socialConnectionInfo.imageUrl}, #{socialConnectionInfo.accessToken}, #{socialConnectionInfo.secret},
+		${socialConnectionInfo.expreTime}, #{userInfo.loginId}, #{userInfo.name}, #{userInfo.gender}, #{userInfo.email},  #{userInfo.password}, 
+		#{userInfo.mobile}, #{userInfo.id, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>	
+	
+</mapper>

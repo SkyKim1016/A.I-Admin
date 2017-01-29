@@ -1,0 +1,128 @@
+package com.onethefull.recipe.controller;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.comm.service.FriendshipService;
+import com.onethefull.recipe.req.FriendshipReq;
+import com.onethefull.recipe.type.FriendshipStatusType;
+
+@Controller
+@RequestMapping("/rapi/friendship")
+public class FriendshipController extends BaseController {
+
+	private final static Logger logger = LoggerFactory.getLogger(FriendshipController.class);
+	
+	@Resource(name = "friendshipService")
+	private FriendshipService friendshipService;
+	
+	// 친구 목록
+	@RequestMapping(value = "friend/list",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getFriends(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setUserId(user.getId());
+		
+		return friendshipService.getFriends(req);
+	}
+	
+	// 친구 요청
+	@RequestMapping(value = "/request",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData actRequest(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setRequesterId(user.getId());
+		req.setStatus(FriendshipStatusType.ONREQUESTING);
+		
+		return friendshipService.actFriendship(req);
+	}
+	
+	// 친구 요청 승인
+	@RequestMapping(value = "/request/accept",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData actRequestAccept(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setRequesterId(req.getUserId());
+		req.setUserId(user.getId());
+		req.setStatus(FriendshipStatusType.FRIEND);
+		
+		return friendshipService.actFriendship(req);
+	}
+	
+	// 친구 요청 최수
+	@RequestMapping(value = "/request/cancel",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData actRequestCancel(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setRequesterId(user.getId());
+		req.setStatus(FriendshipStatusType.REQUESTCANCELED);
+		
+		return friendshipService.actFriendship(req);
+	}
+	
+	// 친구 요청 거부
+	@RequestMapping(value = "/request/reject",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData actRequestReject(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+
+		req.setRequesterId(req.getUserId());
+		req.setUserId(user.getId());
+		req.setStatus(FriendshipStatusType.REQUESTREJECTED);
+		
+		return friendshipService.actFriendship(req);
+	}
+	
+	// 친구 괜계 해제
+	@RequestMapping(value = "/cancel",method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData cancelFriendship(HttpServletRequest request, @RequestBody FriendshipReq req) {
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+
+		req.setRequesterId(user.getId());
+		req.setStatus(FriendshipStatusType.FRIENDSHIPCANCELED);
+		
+		return friendshipService.actFriendship(req);
+	}
+			
+		
+}

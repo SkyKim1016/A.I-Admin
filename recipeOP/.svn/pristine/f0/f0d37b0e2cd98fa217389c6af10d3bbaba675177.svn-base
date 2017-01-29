@@ -1,0 +1,52 @@
+package com.onethefull.recipe.vo;
+
+public class RecipeIngrVOwithDday {
+	private String ingredientId;
+	private String ingredientName;
+	private String ingredientQnt;
+	private String ingredientDday;
+	private String ingredientImageUrl;
+	
+	public RecipeIngrVOwithDday() {}
+	
+	public RecipeIngrVOwithDday(String ingredientId, String ingredientName, String ingredientQnt, String ingredientDday, String ingredientImageUrl) {
+		super();
+		this.ingredientId = ingredientId;
+		this.ingredientName = ingredientName;
+		this.ingredientQnt = ingredientQnt;
+		this.ingredientDday = ingredientDday;
+		this.setIngredientImageUrl(ingredientImageUrl);
+	}
+	public String getIngredientQnt() {
+		return ingredientQnt;
+	}
+	public String getIngredientDday() {
+		return ingredientDday;
+	}
+	public void setIngredientDday(String ingredientDday) {
+		this.ingredientDday = ingredientDday;
+	}
+	public String getIngredientImageUrl() {
+		return ingredientImageUrl;
+	}
+
+	public void setIngredientImageUrl(String ingredientImageUrl) {
+		this.ingredientImageUrl = ingredientImageUrl;
+	}
+
+	public void setIngredientQnt(String ingredientQnt) {
+		this.ingredientQnt = ingredientQnt;
+	}
+	public String getIngredientId() {
+		return ingredientId;
+	}
+	public void setIngredientId(String ingredientId) {
+		this.ingredientId = ingredientId;
+	}
+	public String getIngredientName() {
+		return ingredientName;
+	}
+	public void setIngredientName(String ingredientName) {
+		this.ingredientName = ingredientName;
+	}
+}

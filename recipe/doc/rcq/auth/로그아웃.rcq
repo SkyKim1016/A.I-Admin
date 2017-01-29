@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.2.2"><request><http-version>1.1</http-version><http-follow-redirects/><URL>http://localhost:8080/recipe/rapi/auth/logout</URL><method>POST</method><headers><header key="auth_token" value="d1f783405a3a7b363b201a3621cd23e7cb73e3ba6d878c6d83de5e0a9281d827"/></headers><body><string content-type="application/json" charset="UTF-8">{}</string></body></request></rest-client>

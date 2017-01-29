@@ -1,0 +1,4 @@
+region.type=AWS
+cdn.bucket=proto-recipe
+domain.url=http://146.148.12.32:8080/recipe
+external.api.weather=http://api.openweathermap.org/data/2.5/weather?lat=37.583328&lon=127&units=metric&&appid=79b7e58757ae6a1cf50aa78274e85c2e

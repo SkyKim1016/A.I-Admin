@@ -1,0 +1,40 @@
+package com.onethefull.recipe.comm.service;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.vo.PageInfoVO;
+import com.onethefull.recipe.mapper.CognizeMapper;
+import com.onethefull.recipe.req.CognizeReq;
+import com.onethefull.recipe.req.ConditionCognizeReq;
+import com.onethefull.recipe.vo.ConditionCognizeVO;
+
+@Service("cognizeService")
+public class CognizeService {
+
+	@Resource(name = "cognizeMapper")
+	private CognizeMapper cognizeMapper;
+	
+	public ResultWithData getCondtionCognizeRequestList(ConditionCognizeReq conditionCognizeReq) {
+		ResultWithData result = ResultWithData.succcessResult();
+		PageInfoVO pageInfoVO = cognizeMapper.getCondtionCognizeRequestListPageInfo(conditionCognizeReq);
+		pageInfoVO.setCurrentPageNum(conditionCognizeReq.getPageNum());
+		pageInfoVO.setPageSize(conditionCognizeReq.getPageSize());
+		result.addData("pageInfo", pageInfoVO);
+		List<ConditionCognizeVO> conditionCognizeRequestList = cognizeMapper.getCondtionCognizeRequestList(conditionCognizeReq);
+		result.addData("list", conditionCognizeRequestList);
+		return result;
+	}
+
+	public ResultWithData getCondtionCognizeRequestDetail(CognizeReq cognizeReq) {
+		ResultWithData result = ResultWithData.succcessResult();
+		ConditionCognizeVO conditionCognizeVO = cognizeMapper.getConditionCognize(cognizeReq);
+		result.addData("cognize", conditionCognizeVO);
+		return result;
+	}
+
+}

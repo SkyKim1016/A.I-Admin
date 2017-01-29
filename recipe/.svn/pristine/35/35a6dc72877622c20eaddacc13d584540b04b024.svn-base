@@ -1,0 +1,12 @@
+package com.onethefull.recipe.mapper;
+
+import org.springframework.stereotype.Repository;
+
+import com.onethefull.recipe.req.ExternalWeatherReq;
+
+@Repository("externalAPIMapper")
+public interface ExternalAPIMapper {
+
+	public int registerWeather(ExternalWeatherReq req);
+	
+}

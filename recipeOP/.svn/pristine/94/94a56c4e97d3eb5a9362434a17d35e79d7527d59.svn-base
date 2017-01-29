@@ -1,0 +1,227 @@
+package com.onethefull.recipe.controller;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.comm.req.BaseReq;
+import com.onethefull.recipe.req.FridgeIngrReq;
+import com.onethefull.recipe.req.RecipeReq;
+import com.onethefull.recipe.service.RecipeService;
+import com.onethefull.recipe.type.FridgeIngrType;
+
+@Controller
+@RequestMapping("/rapi/recipe")
+public class RecipeController extends BaseController {
+
+	@Resource(name = "recipeService")
+	private RecipeService recipeService;
+
+	@RequestMapping(value = "/{recipeId}", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getRecipeDetail(HttpServletRequest request, @PathVariable String recipeId) {
+		
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		RecipeReq req = new RecipeReq();
+		req.setUserId(user.getId());
+		req.setRecipeId(recipeId);
+		req.setLanguageId(this.getLanguageId(request));
+		return recipeService.getRecipeDetail(req);
+	}
+	
+
+	@RequestMapping(value = "/{recipeId}/process", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getRecipeDetailProcess(HttpServletRequest request, @PathVariable String recipeId) {
+		
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		RecipeReq req = new RecipeReq();
+		req.setUserId(user.getId());
+		req.setRecipeId(recipeId);
+		req.setLanguageId(this.getLanguageId(request));
+		return recipeService.getRecipeDetailProcess(req);
+	}
+
+	/*
+	 * 냉장고 식자재 정보 가져오기(데모용)
+	 * parameter : RecipeReq
+	 * 2016-4-20
+	 * 김성준
+	 */
+	/*
+	@Deprecated
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getFridgeIngrDemo(HttpServletRequest request, @RequestBody RecipeReq recipeReq) {
+		FridgeIngrReq fridgeIngrReq = new FridgeIngrReq();
+		fridgeIngrReq.setUserId(recipeReq.getUserId());
+		return recipeService.getFridgeIngr(fridgeIngrReq);
+	}
+	*/
+	
+	/*
+	 * 냉장고 식자재 정보 가져오기
+	 * parameter : RecipeReq
+	 * 2016-5-23
+	 * 김성준
+	 */
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getFridgeIngr(HttpServletRequest request) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		FridgeIngrReq fridgeIngrReq = new FridgeIngrReq();
+		fridgeIngrReq.setUserId(user.getId());
+		fridgeIngrReq.setLanguageId(this.getLanguageId(request));
+		return recipeService.getFridgeIngr(fridgeIngrReq);
+	}
+	
+	/*
+	 * 냉장고 식자재 정보 직접 입력하기
+	 * parameter : RecipeReq
+	 * 2016-7-6
+	 * 김성준
+	 */
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData insertFridgeIngr(HttpServletRequest request, @RequestBody FridgeIngrReq fridgeIngrReq) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		fridgeIngrReq.setUserId(user.getId());
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.DATE, 5);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		fridgeIngrReq.setIngredientDday(simpleDateFormat.format(calendar.getTime()));
+		fridgeIngrReq.setLanguageId(this.getLanguageId(request));
+		return recipeService.updateFridgeIngr(fridgeIngrReq);
+	}
+	
+	/*
+	 * 냉장고 식자재 정보 수정하기
+	 * parameter : RecipeReq
+	 * 2016-5-23
+	 * 김성준
+	 */
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.PUT)
+	@ResponseBody
+	public ResultWithData updateFridgeIngr(HttpServletRequest request, @RequestBody FridgeIngrReq fridgeIngrReq) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		fridgeIngrReq.setUserId(user.getId());
+		fridgeIngrReq.setType(FridgeIngrType.UPDATE);
+		fridgeIngrReq.setLanguageId(this.getLanguageId(request));
+		return recipeService.updateFridgeIngr(fridgeIngrReq);
+	}
+	
+	/*
+	 * 냉장고 식자재 정보 삭제하기
+	 * parameter : RecipeReq
+	 * 2016-5-23
+	 * 김성준
+	 */
+	@RequestMapping(value = "/fridgeIngr", method = RequestMethod.DELETE)
+	@ResponseBody
+	public ResultWithData deleteFridgeIngr(HttpServletRequest request, @RequestBody FridgeIngrReq fridgeIngrReq) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		fridgeIngrReq.setUserId(user.getId());
+		fridgeIngrReq.setType(FridgeIngrType.DELETE);
+		fridgeIngrReq.setLanguageId(this.getLanguageId(request));
+		return recipeService.updateFridgeIngr(fridgeIngrReq);
+	}
+	
+	/*
+	 * 검색용 식자재 목록 가져오기
+	 * parameter : RecipeReq
+	 * 2016-6-24
+	 * 김성준
+	 */
+	@RequestMapping(value = "/ingr/list", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getIngrList(HttpServletRequest request) {
+		BaseReq req = new BaseReq();
+		req.setLanguageId(this.getLanguageId(request));		
+		return recipeService.getIngrList(req);
+	}
+	
+	// 창작을 위한 주재료 20개 목록
+	@RequestMapping(value = "/ingr/list/forcreate", method = RequestMethod.GET)
+	@ResponseBody
+	public ResultWithData getIngrListforCREATE(HttpServletRequest request) {
+		BaseReq req = new BaseReq();
+		req.setLanguageId(this.getLanguageId(request));
+		return recipeService.getIngrListforCREATE(req);
+	}
+	
+	/*
+	 * 레시피 좋아요
+	 * parameter : RecipeReq
+	 * 2016-6-24
+	 * 김성준
+	 */
+	@RequestMapping(value = "/{recipeId}/like", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData attachRecipeLike(HttpServletRequest request, @PathVariable String recipeId) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		RecipeReq req = new RecipeReq();
+		req.setUserId(user.getId());
+		req.setRecipeId(recipeId);
+		req.setLanguageId(this.getLanguageId(request));
+		return recipeService.updateRecipeLike(req, true);
+	}
+	
+	/*
+	 * 레시피 좋아요 해제
+	 * parameter : RecipeReq
+	 * 2016-6-24
+	 * 김성준
+	 */
+	@RequestMapping(value = "/{recipeId}/like", method = RequestMethod.DELETE)
+	@ResponseBody
+	public ResultWithData dettachRecipeLike(HttpServletRequest request, @PathVariable String recipeId) {
+		User user = this.getUser(request);
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		RecipeReq req = new RecipeReq();
+		req.setUserId(user.getId());
+		req.setRecipeId(recipeId);
+		req.setLanguageId(this.getLanguageId(request));
+		return recipeService.updateRecipeLike(req, false);
+	}
+}

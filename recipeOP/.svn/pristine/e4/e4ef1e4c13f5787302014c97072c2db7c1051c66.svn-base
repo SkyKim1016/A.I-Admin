@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.UserAuthMapper">
+	<select id="getUserbyAuthToken" parameterType="com.onethefull.recipe.comm.auth.User" resultType="com.onethefull.recipe.comm.auth.User">
+			select b.id, b.loginId as loginId, b.userid as email, a.auth_token as authToken, b.name, b.gender, b.mobile, b.status
+			  from mst_user_auth_token a, 
+			       mst_user b
+			where a.id_user = b.id
+		 	and a.auth_token = #{authToken}
+	</select>
+	
+	<select id="findUserbyIdPassword" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE 1 = 1
+		 <if test="id != null and id != ''">
+		 	and id = #{id}
+		 </if>
+		 <if test="loginId != null and loginId != ''">
+		 	and loginId = #{loginId}
+		 </if>
+		 	and password = #{password}
+	</select>	
+		
+	<select id="findUserbyLoginId" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE loginId = #{loginId}
+	</select>	
+	
+	<select id="findUserbyId" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE id = #{id}
+	</select>
+	
+	<select id="findUserbyProviderUserId" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		select u.id, u.loginId, u.name, u.gender, ifnull(u.image_original_url, s.image_url) as imageOriginalUrl, ifnull(u.image_thumb_url, s.image_url) as imageThumbUrl, u.status, ifnull(s.provider_id, 'NONE') as providerId
+		from mst_user_social_connect s
+        left join mst_user u on s.id_user = u.id
+		where s.provider_id = #{socialConnectionInfo.providerId} and s.provider_user_id = #{socialConnectionInfo.providerUserId}
+	</select>	
+	
+	<select id="findUserbyDeviceInfo" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		select u.id, u.loginId, u.name, u.gender, u.image_original_url as imageOriginalUrl, u.image_thumb_url as imageThumbUrl, u.status, 'NONE' as providerId
+		from mst_user_device d
+        left join mst_user u on d.userid = u.id
+		where d.`type` = #{userDeviceInfo.deviceType} and d.token = #{userDeviceInfo.deviceId}
+	</select>	
+	
+	<update id="setAuthToken" parameterType="com.onethefull.recipe.req.AuthTokenReq" statementType="CALLABLE">
+		{ CALL sp_user_auth_token_master(#{userId}, #{authToken}, #{tokenActionType}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<update id="setUserDeviceInfo" parameterType="com.onethefull.recipe.req.UserDeviceReq" statementType="CALLABLE">
+		{ CALL  sp_user_device_register(#{userId}, #{deviceType}, #{deviceId}, #{userId, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+    <select id="getUserDeviceInfo" parameterType="com.onethefull.recipe.req.UserDeviceReq" resultType="com.onethefull.recipe.comm.vo.DeviceVO">
+		select type as deviceType, token as regid
+		from mst_user_device
+		where userid = #{userId}
+		  AND status = #{status.code}
+	</select>
+    
+	<update id="setUserServiceProviderInfo" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" statementType="CALLABLE">
+		{ CALL  sp_user_social_connect_register_v2(#{socialConnectionInfo.providerId}, #{socialConnectionInfo.providerUserId}, 
+		#{socialConnectionInfo.profileUrl}, #{socialConnectionInfo.imageUrl}, #{socialConnectionInfo.accessToken}, #{socialConnectionInfo.secret},
+		${socialConnectionInfo.expireTime}, #{userInfo.loginId}, #{userInfo.name}, #{userInfo.gender}, #{userInfo.email},  #{userInfo.password}, 
+		#{userInfo.mobile}, #{userDeviceInfo.deviceType}, #{userDeviceInfo.deviceId}, #{userInfo.id, mode=OUT, jdbcType=VARCHAR}, #{userInfo.status, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<update id="registerUserbyDeviceInfo" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" statementType="CALLABLE">
+		{ CALL  sp_user_device_register(null, #{userDeviceInfo.deviceType}, #{userDeviceInfo.deviceId}, #{userInfo.id, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>	
+		
+	
+	<update id="modifyFavoriteStep1" parameterType="com.onethefull.recipe.req.ModifyFavoriteStep1Req" statementType="CALLABLE">
+		{ CALL  sp_user_favorite_check_recipe(#{userId}, #{listInfo}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<select id="getCheckHealthList" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckHealthVO">  
+		select a.id, a.name, a.level, case when h.id is not null then 1 else 0 end as isSelected
+		from mst_check_health a
+		left join mst_user_check_health h on a.id = h.id_check_health and h.id_user = #{id}
+		where a.status = 'A'
+		order by a.level, a.priority
+	</select>		
+
+	<select id="getCheckJobList" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckJobVO">  
+		select a.id, a.name, case when h.id is not null then 1 else 0 end as isSelected
+		from mst_check_job a
+		left join mst_user_check_job h on a.id = h.id_check_job and h.id_user = #{id}
+		where a.status = 'A'
+		order by a.priority
+	</select>	
+	
+	<select id="getCheckActivityLevel" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckActivityVO">  
+		select a.activity_level as level
+		from mst_user_activitylevel a
+		where a.id_user = #{id}
+		
+	</select>	
+	
+	<select id="getAgeLevel" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckActivityVO">  
+		select a.age_code as level
+		from mst_user a
+		where a.id = #{id}
+		
+	</select>		
+
+	<update id="modifyCheckHealth" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_health(#{id}, #{healthId}, #{selected, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+		
+	
+	<update id="modifyCheckJob" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_job(#{id}, #{jobId}, #{selected, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+
+	<update id="modifyCheckActivityLevel" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_activitylevel(#{id}, ${activityLevel}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<update id="modifyAgeLevel" parameterType="com.onethefull.recipe.req.UserReq">
+		UPDATE mst_user
+		SET	age_code = #{ageLevel}
+		WHERE `id` = #{id};
+	
+	</update>
+		
+	<select id="getUsersPageInfo" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(u.id) as itemSize,  ceiling(count(u.id) * 1.0 / ${pageSize}) as lastPageNum  
+		FROM mst_user u
+		WHERE 1=1
+		<if test="id != null and id != ''">
+			AND u.id = #{id}
+		</if>
+		<if test="ownerId != null and ownerId != ''">
+			AND u.id != #{ownerId}
+		</if>
+		<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+			<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+		   and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+		    </if>
+			<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+				and (
+					u.name like CONCAT('%',#{keywordReq.keyValue},'%') or
+					u.loginid like CONCAT('%',#{keywordReq.keyValue},'%')
+				)
+			</if>
+		</if>
+	</select>
+
+	<select id="getUsersList" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.UserSimple">  
+		SELECT u.id, u.loginid, u.name,  u.gender, ifnull(u.image_original_url, s.image_url) as imageOriginalUrl, ifnull(u.image_thumb_url, s.image_url) as imageThumbUrl,
+		case WHEN f.id_user IS NOT NULL THEN 'FF' WHEN r.id_user = #{ownerId} THEN 'FV' WHEN r.id_requester = #{ownerId} THEN 'FR' end as friendshipStatus
+		FROM mst_user u
+		left join mst_friendship f on u.id = f.id_friend AND f.id_user = #{ownerId}
+		<if test="id != null and id != ''">
+			AND f.id_friend = #{id}
+		</if>			
+		left join tbl_friendship_request r on ( u.id = r.id_user or u.id = r.id_requester)
+		<if test="id != null and id != ''">
+			AND r.id_user = #{id}
+		</if>			
+		left join mst_user_social_connect s on u.id = s.id_user
+		<if test="id != null and id != ''">
+			AND s.id = #{id}
+		</if>		
+		WHERE 1=1
+		<if test="id != null and id != ''">
+			AND u.id = #{id}
+		</if>
+		<if test="ownerId != null and ownerId != ''">
+			AND u.id != #{ownerId}
+		</if>
+		<if test="keywordReq !=null and keywordReq.keyValue != null and keywordReq.keyValue != ''">
+			<if test="keywordReq.keyCol != null and keywordReq.keyCol != ''">
+		   		and ${keywordReq.keyCol} like CONCAT('%',#{keywordReq.keyValue},'%')
+		    </if>
+			<if  test="keywordReq.keyCol == null or keywordReq.keyCol == ''">
+				and (
+					u.name like CONCAT('%',#{keywordReq.keyValue},'%') or
+					u.loginid like CONCAT('%',#{keywordReq.keyValue},'%')
+				)
+			</if>
+		</if>
+		<if test="admin">
+			AND u.admin = 'Y'
+		</if>
+		order by u.name asc
+		limit ${startNum}, ${pageSize}
+	</select>		
+		
+	<update id="updateUser" parameterType="com.onethefull.recipe.req.UserReq">
+		UPDATE mst_user
+		SET	`id` = #{id}
+			<if test="name != null and name != ''">
+			, name = #{name}
+			</if>
+			<if test="gender != null and gender != ''">
+			, gender = #{gender}
+			</if>
+			<if test="mobile != null and mobile != ''">
+			, mobile = #{mobile}
+			</if>
+			<if test="imageThumbUrl != null and imageThumbUrl != ''">
+			, image_thumb_url = #{imageThumbUrl}
+			</if>
+			<if test="imageOriginalUrl != null and imageOriginalUrl != ''">
+			, image_original_url = #{imageOriginalUrl}
+			</if>
+			<if test="status != null and status != ''">
+			, status = #{status}
+			</if>
+			WHERE `id` = #{id};
+	
+	</update>
+	
+</mapper>

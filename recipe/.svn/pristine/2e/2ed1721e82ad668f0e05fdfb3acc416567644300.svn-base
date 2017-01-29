@@ -1,0 +1,28 @@
+package com.onethefull.recipe.controller;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.service.CognizeService;
+import com.onethefull.recipe.req.ConditionCognizeReq;
+
+@Controller
+@RequestMapping("/rapi/cognize")
+public class CognizeController {
+
+	@Resource(name = "cognizeService")
+	private CognizeService cognizeService;
+	
+	@RequestMapping(value = "/condition/request", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getCondtionCognizeRequestList(@RequestBody ConditionCognizeReq condtionCognizeReq) {
+		return cognizeService.getCondtionCognizeRequestList(condtionCognizeReq);
+	}
+	
+}

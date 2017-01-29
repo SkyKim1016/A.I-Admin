@@ -1,0 +1,134 @@
+package com.onethefull.recipe.res;
+
+import java.util.List;
+
+public class RecipeDetail {
+	private String recipeId;
+	private String recipeName;
+	private String categoryName;
+	private String categoryId;
+	private String cookingTime;
+	private int calorie;
+	private String imageUrl;
+	private String referedUrl;
+	private String storageInfo;
+	private String memo;
+	private int cookDifficulty;
+	
+	private List<FridgeIngr> stuffs;
+	private List<RecipeDetailProcess> processes;
+	private List<RecipeDetailNutrient> nutrients;
+
+	public String getRecipeId() {
+		return recipeId;
+	}
+
+	public void setRecipeId(String recipeId) {
+		this.recipeId = recipeId;
+	}
+
+	public String getRecipeName() {
+		return recipeName;
+	}
+
+	public void setRecipeName(String recipeName) {
+		this.recipeName = recipeName;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+	public String getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(String categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public String getCookingTime() {
+		return cookingTime;
+	}
+
+	public void setCookingTime(String cookingTime) {
+		this.cookingTime = cookingTime;
+	}
+
+	public int getCalorie() {
+		return calorie;
+	}
+
+	public void setCalorie(int calorie) {
+		this.calorie = calorie;
+	}
+
+	public String getReferedUrl() {
+		return referedUrl;
+	}
+
+	public void setReferedUrl(String referedUrl) {
+		this.referedUrl = referedUrl;
+	}
+
+	public String getStorageInfo() {
+		return storageInfo;
+	}
+
+	public void setStorageInfo(String storageInfo) {
+		this.storageInfo = storageInfo;
+	}
+
+	public String getMemo() {
+		return memo;
+	}
+
+	public void setMemo(String memo) {
+		this.memo = memo;
+	}
+
+	public int getCookDifficulty() {
+		return cookDifficulty;
+	}
+
+	public void setCookDifficulty(int cookDifficulty) {
+		this.cookDifficulty = cookDifficulty;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+
+	public List<FridgeIngr> getStuffs() {
+		return stuffs;
+	}
+
+	public void setStuffs(List<FridgeIngr> stuffs) {
+		this.stuffs = stuffs;
+	}
+
+	public List<RecipeDetailProcess> getProcesses() {
+		return processes;
+	}
+
+	public void setProcesses(List<RecipeDetailProcess> processes) {
+		this.processes = processes;
+	}
+
+	public List<RecipeDetailNutrient> getNutrients() {
+		return nutrients;
+	}
+
+	public void setNutrients(List<RecipeDetailNutrient> nutrients) {
+		this.nutrients = nutrients;
+	}
+
+}

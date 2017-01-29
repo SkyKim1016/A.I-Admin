@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.RecipeMapper">
+	<select id="getRecipeDetailMaster" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.RecipeMasterVO">  
+
+		select id as recipeId, id_category as categoryId, name as recipeName, cook_time as cookingTime, 
+		calorie, image_url as imageUrl, refered_url as referedUrl, storage_info as storageInfo, memo, cook_difficulty as cookDifficulty
+		from mst_recipe
+		where id = #{recipeId}
+
+	</select>
+	
+	<select id="getRecipeStuffs" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailStuff">  
+
+		select m.id_stuff as stuffId, s.name as stuffName, m.quantity_info as quantityInfo
+		<if test="userId !=null and userId != ''">
+		, max(h.expiration_date) as expirationDate, h.id_user as userId
+		</if>
+		from mst_recipe_stuff m
+		join mst_stuff s on m.id_stuff = s.id
+		<if test="userId !=null and userId != ''">
+		left join mst_user_stuff_having h on m.id_stuff = h.id_stuff and h.expiration_date > now() and h.id_user = #{userId}
+		</if>
+		where m.id_recipe = #{recipeId}
+		<if test="userId !=null and userId != ''">
+			group by stuffId, stuffName, quantityInfo
+		</if>
+		
+	</select>
+
+	<select id="getRecipeNutrients" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailNutrient">  
+
+		select m.id_nutrient as nutrientId, n.name as stuffName, m.quantity_info as quantityInfo
+		from mst_recipe_nutrient m
+		join mst_nutrient n on m.id_nutrient = n.id
+		where id_recipe = #{recipeId}
+
+	</select>
+
+	<select id="getRecipeProcesses" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.res.RecipeDetailProcess">  
+
+		select seq, process_info as description
+		from mst_recipe_process
+		where id_recipe = #{recipeId}
+		order by seq;
+
+	</select>
+	
+	<select id="getFridgeIngr" parameterType="com.onethefull.recipe.req.RecipeReq" resultType="com.onethefull.recipe.vo.FridgeIngrVO">  
+		select id_stuff as ingredientId, h.qty, h.unit, h.expiration_date as expirationDate, s.name as ingredientName, 
+		s.id_category as ingrCategoryId, c.name as ingrCategoryName, c.image_url as ingrCategoryImageUrl, 2 as ingredientDday, s.image_url as ingredientImageUrl
+		from mst_user_stuff_having h
+		join mst_stuff s on h.id_stuff = s.id
+		left join mst_category_stuff c on s.id_category = c.id
+		where h.id_user = #{userId}
+		order by ingrCategoryName, ingredientName
+
+
+	</select>	
+	
+</mapper>

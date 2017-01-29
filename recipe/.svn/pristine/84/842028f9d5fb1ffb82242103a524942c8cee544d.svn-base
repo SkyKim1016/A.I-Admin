@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.onethefull.recipe.mapper.FriendshipMapper">
+
+	<select id="getFriends" parameterType="com.onethefull.recipe.req.FriendshipReq" resultType="com.onethefull.recipe.vo.FriendVO">  
+		select a.id, u.name, u.image_thumb_url as imageThumbUrl, u.image_original_url as imageOriginalUrl, a.createDate, a.`status`
+		from (
+			select id_friend as id, reg_date as createDate, 'FF' as `status`
+			  from mst_friendship
+			 where id_user = #{userId}
+			 union 
+			select id_user as id, reg_date as createDate, 'FR' as `status`
+			  from tbl_friendship_request
+			 where id_requester = #{userId}
+		 ) a
+		 join mst_user u on a.id = u.id
+		 order by u.name
+		 limit 0, 10
+	 
+	</select>
+	
+	<update id="actFriendship" parameterType="com.onethefull.recipe.req.FriendshipReq" statementType="CALLABLE">
+		{ CALL  sp_friendship_request(#{userId}, #{requesterId}, #{status.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+			
+	
+</mapper>

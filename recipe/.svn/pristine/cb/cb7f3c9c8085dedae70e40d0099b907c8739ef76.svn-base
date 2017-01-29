@@ -1,0 +1,462 @@
+package com.onethefull.recipe.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.mapper.RcmdMapper;
+import com.onethefull.recipe.mapper.RecipeMapper;
+import com.onethefull.recipe.mapper.RecipeSetMapper;
+import com.onethefull.recipe.req.AIRecipeReq;
+import com.onethefull.recipe.req.AIRecipeSeqReq;
+import com.onethefull.recipe.req.AIRecipeSurpriseLevel;
+import com.onethefull.recipe.req.AiRecipeDetailReq;
+import com.onethefull.recipe.req.RcmdRecipeReq;
+import com.onethefull.recipe.req.RecipeIngrReq;
+import com.onethefull.recipe.req.RecipeReq;
+import com.onethefull.recipe.req.RecipeSetReq;
+import com.onethefull.recipe.res.RecipeDetailProcess;
+import com.onethefull.recipe.vo.AiRecipeDetailVO;
+import com.onethefull.recipe.vo.AiRecipeIngriVO;
+import com.onethefull.recipe.vo.AiRecipePhaseVO;
+import com.onethefull.recipe.vo.CookingStep;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+import com.onethefull.recipe.vo.RcmdStuffPMIVO;
+import com.onethefull.recipe.vo.RecipeIngrVO;
+import com.onethefull.recipe.vo.RecipeMasterVO;
+import com.onethefull.recipe.vo.RecipeSetVO;
+
+@Service("recipeSetService")
+public class RecipeSetService {
+
+	@Value("#{serverProperty['domain.url']}")
+	private String domainUrl;
+	
+	@Resource(name = "recipeSetMapper")
+	private RecipeSetMapper recipeSetMapper;
+	
+	@Resource(name = "recipeMapper")
+	private RecipeMapper recipeMapper;
+	
+	@Resource(name = "rcmdMapper")
+	private RcmdMapper rcmdMapper;
+	
+	public void setNewRecommendStuffs(RcmdRecipeReq req) {
+		// 추천 식자재를 변경한다.
+		try {
+			rcmdMapper.setNewRecommendStuffs(req);				
+		} catch(Exception e) {
+			
+		}
+	}
+	
+	public ResultWithData getRecipeSet(RecipeSetReq req) {
+
+		List<RecipeSetVO> recipeSetLists = new ArrayList<RecipeSetVO>();
+		
+		RcmdRecipeVO temp = null;
+		RcmdRecipeVO recipeIdofMoonShef = this.getRecipeIdofMoonShef(req);
+		RcmdRecipeVO recipeIdforTaste = this.getRecipeIdforTaste(req);
+		RcmdRecipeVO recipeIdforHealth = this.getRecipeIdforHeath(req);
+		
+		// 데이터가 적을 때 발생할 추천 레시피 null 방지 임시 방편
+		if(recipeIdofMoonShef != null) {
+			temp = recipeIdofMoonShef;
+		}
+		
+		if(temp == null && recipeIdforTaste != null) {
+			temp = recipeIdforTaste;
+		}
+		
+		if(temp == null && recipeIdforHealth != null) {
+			temp = recipeIdforHealth;
+		}
+		
+		if(temp != null) {
+			if(recipeIdofMoonShef == null) {
+				recipeIdofMoonShef = temp;
+			}
+			if(recipeIdforTaste == null) {
+				recipeIdforTaste = temp;
+			}
+			if(recipeIdforHealth == null) {
+				recipeIdforHealth = temp;
+			}
+			
+			this.setNewRecommendStuffs((RcmdRecipeReq) req);
+		}
+		
+		recipeSetLists.add(new RecipeSetVO(recipeIdofMoonShef.getRecipeId(), recipeIdforHealth.getRecipeId(), recipeIdforTaste.getRecipeId(), "20160416152147", 
+				"문성희 쉐프 추천", "for your Health!", "for your Taste!", "A.I CHEF", 
+				recipeIdofMoonShef.getRecipeName(), recipeIdforHealth.getRecipeName(), recipeIdforTaste.getRecipeName(), "창작 레시피 추천", 
+				recipeIdofMoonShef.getImageUrl(), 
+				recipeIdforHealth.getImageUrl(), 
+				recipeIdforTaste.getImageUrl(), 
+				"https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/screen_ai_recipe2.png"));
+
+		/*
+		recipeSetLists.add(new RecipeSetVO("20160416152011", "20160416152059", "20160420121750", "20160416152147", 
+				"문성희 쉐프 추천", "for your Health!", "for your Taste!", "A.I CHEF", 
+				"돈가스", "냉채족발", "닭갈비", "아귀찜", 
+				"https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/sample0011.jpg", 
+				"https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/sample0012.jpg", 
+				"https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/sample0014.jpg", 
+				"https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/sample0013.jpg"));
+			*/
+		return ResultWithData.succcessResult().addData("list", recipeSetLists);
+	}
+	
+	// 문성희 세프 추천 레시피
+	public RcmdRecipeVO getRecipeIdofMoonShef(RecipeSetReq req) {
+		List<RcmdStuffPMIVO> addStuffList = this.getRecommendStuffsforTaste(req);
+		
+		if(addStuffList != null && !addStuffList.isEmpty()) {
+			int num = 0;
+			num = addStuffList.size();
+			if(num >=5) num = 5;
+			int random = (int) (Math.random() * num);
+			RcmdRecipeReq findRecipeReq = new RcmdRecipeReq();
+			findRecipeReq.setUserId(req.getUserId());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId1());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId2());
+			findRecipeReq.seperateIds();			
+			findRecipeReq.setChefCode("MOON");
+			
+			List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(findRecipeReq);
+			
+			
+			if(list != null && !list.isEmpty()) {
+				num = list.size();
+				if(num >= 5) num = 5;
+				random = (int) (Math.random() * num);
+				return list.get(random);
+			} else {
+				return rcmdMapper.getRecommendRecipiesChef(findRecipeReq);
+			}
+		}
+		
+		return null;
+	}	
+	
+	// 맛기준 추천 레시피
+	public RcmdRecipeVO getRecipeIdforTaste(RecipeSetReq req) {
+		List<RcmdStuffPMIVO> addStuffList = this.getRecommendStuffsforTaste(req);
+		
+		if(addStuffList != null && !addStuffList.isEmpty()) {
+			int num = 0;
+			num = addStuffList.size();
+			if(num >=5) num = 5;
+			int random = (int) (Math.random() * num);
+			RcmdRecipeReq findRecipeReq = new RcmdRecipeReq();
+			findRecipeReq.setUserId(req.getUserId());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId1());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId2());
+			findRecipeReq.seperateIds();			
+			
+			List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(findRecipeReq);
+			
+			
+			if(list != null && !list.isEmpty()) {
+				num = list.size();
+				if(num >= 5) num = 5;
+				random = (int) (Math.random() * num);
+				return list.get(random);
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	// 영양소 기준 추천 레시피
+	public RcmdRecipeVO getRecipeIdforHeath(RecipeSetReq req) {
+		List<RcmdStuffPMIVO> addStuffList = this.getRecommendStuffsforTaste(req);
+		
+		if(addStuffList != null && !addStuffList.isEmpty()) {
+			int num = 0;
+			num = addStuffList.size();
+			if(num >=5) num = 5;
+			int random = (int) (Math.random() * num);
+			RcmdRecipeReq findRecipeReq = new RcmdRecipeReq();
+			findRecipeReq.setUserId(req.getUserId());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId1());
+			findRecipeReq.addStuffId(addStuffList.get(random).getStuffId2());
+			findRecipeReq.seperateIds();			
+			
+			List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipiesforHealth(findRecipeReq);
+			
+			
+			if(list != null && !list.isEmpty()) {
+				num = list.size();
+				if(num >= 5) num = 5;
+				random = (int) (Math.random() * num);
+				return list.get(random);
+			} else {
+				findRecipeReq.setChefCode("HEALTH");;
+				return rcmdMapper.getRecommendRecipiesChef(findRecipeReq);
+			}
+		}
+		
+		return null;
+	}
+		
+	
+	public ResultWithData getRecipeIngr(RecipeIngrReq req) {
+		List<RecipeIngrVO> recipeIngrList = recipeSetMapper.getRecipeIngr(req);
+		return ResultWithData.succcessResult().addData("list", recipeIngrList);
+	}
+	
+	
+	public List<RcmdStuffPMIVO> getRecommendStuffsforTaste(RecipeSetReq req) {
+		List<RcmdStuffPMIVO> list = rcmdMapper.getRecommendStuffsforTaste(req);
+		
+		if(list != null && !list.isEmpty()) return list;
+		
+		list = rcmdMapper.getRecommendStuffsforTasteSub(req);	
+		return list;
+	}
+
+
+	public ResultWithData getAiRecipeDetail(AiRecipeDetailReq req) {
+		
+		List<RcmdStuffPMIVO> basicStuffList = this.getRecommendStuffsforTaste(req);
+		
+		if(basicStuffList != null && !basicStuffList.isEmpty()) {
+			int num = 0;
+			num = basicStuffList.size();
+			if(num >=5) num = 5;
+			int random = (int) (Math.random() * num);
+			req.addStuffId(basicStuffList.get(random).getStuffId1());
+			req.addStuffId(basicStuffList.get(random).getStuffId2());
+			req.seperateIds();
+			
+			List<RcmdRecipeVO> baseRecipeIds = recipeSetMapper.getBaseRecipes(req);
+			String baseRecipeId = null;
+			
+			// surprise level이 낮다면 top 상위로 
+			// 기준이 되는 baseRecipeId를 선정한다.
+			
+			// baseRecipeId 의 조리과정을 가져온다.
+			List<RecipeDetailProcess> baseProcesses = null;
+
+			if(AIRecipeSurpriseLevel.LOW.equals(req.getAiSurpriseLevel())) {
+				if(baseRecipeIds != null) {
+					num = baseRecipeIds.size();
+					if(num >=3) num = 3;
+					while(true) {
+						random = (int) (Math.random() * num);
+						RcmdRecipeVO vo = baseRecipeIds.get(random);
+						baseRecipeId = vo.getRecipeId();				
+						
+						// baseRecipeId 의 조리과정을 가져온다.
+						baseProcesses = recipeMapper.getRecipeProcesses(new RecipeReq(baseRecipeId));
+						
+						if(baseProcesses!=null && !baseProcesses.isEmpty()) {
+							break;
+						}
+						
+						if(num == 1) {
+							return null;
+						}
+					}
+				}
+			} else if (AIRecipeSurpriseLevel.HIGH.equals(req.getAiSurpriseLevel())) {
+				if(baseRecipeIds != null) {
+					int size = baseRecipeIds.size();
+					num = size;
+					if(size >=3) num = 3;
+					size = size - num;
+					while(true) {
+						random = size + (int) (Math.random() * num);
+						RcmdRecipeVO vo = baseRecipeIds.get(random);
+						baseRecipeId = vo.getRecipeId();				
+						
+						// baseRecipeId 의 조리과정을 가져온다.
+						baseProcesses = recipeMapper.getRecipeProcesses(new RecipeReq(baseRecipeId));
+						
+						if(baseProcesses!=null && !baseProcesses.isEmpty()) {
+							break;
+						}
+						
+						if(num == 1) {
+							return null;
+						}
+					}
+				}				
+			} else {
+				if(baseRecipeIds != null) {
+					int size = baseRecipeIds.size();
+					num = size;
+					if(size >=3) num = 3;
+					size = (int) size / 2;
+					if(size > 1) size--;
+					while(true) {
+						random = size + (int) (Math.random() * num);
+						RcmdRecipeVO vo = baseRecipeIds.get(random);
+						baseRecipeId = vo.getRecipeId();				
+						
+						// baseRecipeId 의 조리과정을 가져온다.
+						baseProcesses = recipeMapper.getRecipeProcesses(new RecipeReq(baseRecipeId));
+						
+						if(baseProcesses!=null && !baseProcesses.isEmpty()) {
+							break;
+						}
+						
+						if(num == 1) {
+							return null;
+						}
+					}
+				}				
+			}
+			
+			// baseRecipe 상세정보에서 제목, 이미지 url 가져오기
+			String recipeName = null;
+			String imageUrl = null;		
+			RecipeMasterVO recipevo = recipeMapper.getRecipeDetailMaster(new RecipeReq(baseRecipeId));
+			if(recipevo != null) {
+				recipeName = recipevo.getRecipeName();
+				imageUrl = recipevo.getImageUrl();
+			}	
+			
+			// addRecipeId
+			String addRecipeId = null;
+			
+			// 지정된 식자재 제외하고 남은 식자재로 add recipe 찾기
+			// 2개 식자재로 찾는다.
+			List<RcmdStuffPMIVO> addStuffList = rcmdMapper.getAdditionalStuffsforRecommend((RcmdRecipeReq) req);
+			int stnum = 0;
+			stnum = addStuffList.size();
+			if(stnum >=3) stnum = 3;
+			int strandom = (int) (Math.random() * stnum);
+			String stuffId1 = addStuffList.get(strandom).getStuffId1();
+			String stuffId2 = addStuffList.get(strandom).getStuffId2();
+			String stuffName1 =  addStuffList.get(strandom).getStuffName1();
+			String stuffName2 =  addStuffList.get(strandom).getStuffName2();
+			
+			if(recipeName != null) {
+				if(stuffName1 != null && !stuffName1.isEmpty()) {
+					recipeName = stuffName1 + " " + recipeName;
+					if(stuffName2 != null && !stuffName2.isEmpty()) {
+						recipeName = stuffName2 + ", " + recipeName;
+					}			
+				} else if(stuffName2 != null && !stuffName2.isEmpty()) {
+					recipeName = stuffName2 + " " + recipeName;
+				}			
+			}
+			
+			//빈 페이즈 리스트를 만든다
+			List<CookingStep> cookingStepList = new ArrayList<CookingStep>();
+			
+			if(addStuffList != null && !addStuffList.isEmpty()) {
+				RcmdRecipeReq findRecipeReq = new RcmdRecipeReq();
+				findRecipeReq.setUserId(req.getUserId());
+				findRecipeReq.addStuffId(stuffId1);
+				findRecipeReq.addStuffId(stuffId2);
+				findRecipeReq.seperateIds();	
+				
+				List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(findRecipeReq);
+				
+				if(list != null && !list.isEmpty()) {
+					int addnum = list.size();
+					if(addnum >=3) addnum = 3;
+					while(true) {
+						random = (int) (Math.random() * num);
+						RcmdRecipeVO vo = list.get(random);
+						addRecipeId = vo.getRecipeId();
+						
+						if(!addRecipeId.equals(baseRecipeId)) {
+							break;
+						}
+						
+						if(addnum == 1) {
+							break;
+						}
+					}
+					
+					//basic 레시피의 전체 프로세스 리스트를 가져온다
+					AIRecipeReq aiRecipeReq = new AIRecipeReq();
+					aiRecipeReq.setRecipeId(baseRecipeId);
+					List<AiRecipePhaseVO> listAiWholeProcess = rcmdMapper.getPhaseList(aiRecipeReq);
+					
+					//추가된 프로세스의 리스트를 가져온다
+					AIRecipeReq addRecipeReq = new AIRecipeReq();
+					addRecipeReq.setRecipeId(addRecipeId);
+					List<AiRecipePhaseVO> listaddProcess = rcmdMapper.getPhaseList(addRecipeReq);
+
+					//전체 프로세스
+					List<AiRecipePhaseVO> stepIngrList = new ArrayList<AiRecipePhaseVO>();
+					
+					// 두 레시피를 합친다.
+					// 추가된 프로세스는 3,4 단계만 추가한다.
+					if(listAiWholeProcess != null && !listAiWholeProcess.isEmpty()) {
+						for(AiRecipePhaseVO aiIngriVO : listAiWholeProcess) {
+							
+							stepIngrList.add(aiIngriVO);
+							
+							if("3".equals(aiIngriVO.getSeq())) {
+								if(listaddProcess != null && !listaddProcess.isEmpty()) {
+									for(AiRecipePhaseVO aiAddIngriVO : listaddProcess) {
+										if("3".equals(aiAddIngriVO.getSeq())) {
+											stepIngrList.add(aiAddIngriVO);
+										}
+									}
+								}
+							} else if("4".equals(aiIngriVO.getSeq())) {
+								if(listaddProcess != null && !listaddProcess.isEmpty()) {
+									for(AiRecipePhaseVO aiAddIngriVO : listaddProcess) {
+										if("4".equals(aiAddIngriVO.getSeq())) {
+											stepIngrList.add(aiAddIngriVO);
+										}
+									}
+								}
+							}
+						}
+					}
+					
+					
+					for(AiRecipePhaseVO aiIngriVO : stepIngrList)
+					{
+						//페이즈에 맞는 식자재 리스트를 가져온다
+						int i = Integer.parseInt(aiIngriVO.getSeq());
+						AIRecipeSeqReq aiRSeqReq = new AIRecipeSeqReq(aiIngriVO.getId_recipe(),i);
+						List<AiRecipeIngriVO> listPhaseBySeq = rcmdMapper.getPhaseBySeq(aiRSeqReq);
+						
+						if(aiIngriVO.getSeq().equals(Integer.toString(i)))
+						{
+							String imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/cook.png";
+							if(aiIngriVO.getPhasecode().equals("세척 및 손질"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/wash.png";
+							else if(aiIngriVO.getPhasecode().equals("끓이기"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/boil.png";
+							else if(aiIngriVO.getPhasecode().equals("썰기"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/cut.png";
+							else if(aiIngriVO.getPhasecode().equals("요리"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/cook.png";
+							else if(aiIngriVO.getPhasecode().equals("간하기"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/source.png";
+							else if(aiIngriVO.getPhasecode().equals("굽기"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/fry.png";
+							else if(aiIngriVO.getPhasecode().equals("마무리"))
+								imgUrl = "https://s3.ap-northeast-2.amazonaws.com/proto-recipe/RECIPE/finish.png";
+							cookingStepList.add(new CookingStep(aiIngriVO.getSeq(), aiIngriVO.getPhasecode(), imgUrl, listPhaseBySeq, aiIngriVO.getProcess_info()));
+						}
+					}
+				}
+			}
+			
+			// 추천 식자재 변경
+//			this.setNewRecommendStuffs((RcmdRecipeReq) req);
+
+			return ResultWithData.succcessResult().addData("recipe", new AiRecipeDetailVO(req.getUserId(), baseRecipeId, recipeName, "A.I CHEF", imageUrl, String.valueOf(recipevo.getCookingTime()) + "분", String.valueOf(recipevo.getCookDifficulty()), cookingStepList));
+		}
+		
+		return ResultWithData.failuerResult();			
+		
+	}
+
+}

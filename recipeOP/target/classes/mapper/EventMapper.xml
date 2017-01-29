@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.EventMapper">
+	
+	<update id="crudEventInfo" parameterType="com.onethefull.recipe.req.EventReq" statementType="CALLABLE">
+		{ CALL  sp_event_manage_master(#{eventId}, #{title}, #{content}, #{imageUrl1}, #{imageUrl2}, #{imageUrl3}, #{linkUrl}, #{eventType.code}, #{startDate}, #{endDate},
+		 								#{itemIds}, #{type.code}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<select id="getEventListPageInfo" parameterType="com.onethefull.recipe.req.EventReq" resultType="com.onethefull.recipe.comm.vo.PageInfoVO">
+		SELECT count(e.id) as itemSize,  ceiling(count(e.id) * 1.0 / ${pageSize}) as lastPageNum  
+		  FROM tbl_event_info e
+		 WHERE 1 = 1
+	  	   AND str_to_date(e.start_date, '%Y%m%d %H%i%s') <![CDATA[<=]]> now()
+		   AND str_to_date(e.end_date, '%Y%m%d %H%i%s') <![CDATA[>]]> now()
+	</select>
+	
+	<select id="getEventList" parameterType="com.onethefull.recipe.req.EventReq" resultType="com.onethefull.recipe.vo.EventInfoVO">
+		SELECT e.id, e.title, e.content, e.image_url1 as imageUrl1, e.image_url2 as imageUrl2, e.image_url3 as imageUrl3,
+			e.link_url as linkUrl, e.type, e.start_date as startDate, e.end_date as endDate
+		  FROM tbl_event_info e
+		 WHERE 1 = 1
+		   AND str_to_date(e.start_date, '%Y%m%d %H%i%s') <![CDATA[<=]]> now()
+		   AND str_to_date(e.end_date, '%Y%m%d %H%i%s') <![CDATA[>]]> now()
+		 <if test="eventType != null">
+		 	AND e.type = #{eventType.code}
+		 </if>
+		 ORDER BY e.end_date DESC
+		 LIMIT ${startNum}, ${pageSize}
+	</select>
+
+	<select id="getEvent" parameterType="com.onethefull.recipe.req.EventReq" resultType="com.onethefull.recipe.vo.EventInfoVO">
+		SELECT e.id, e.title, e.content, e.image_url1 as imageUrl1, e.image_url2 as imageUrl2, e.image_url3 as imageUrl3,
+			e.link_url as linkUrl, e.type, e.start_date as startDate, e.end_date as endDate
+		  FROM tbl_event_info e
+		 WHERE 1 = 1
+		 	AND e.id = #{eventId}
+		 <if test="eventType != null">
+		 	AND e.type = #{eventType.code}
+		 </if>
+	</select>
+	
+</mapper>

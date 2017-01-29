@@ -1,0 +1,58 @@
+package com.onethefull.recipe.controller;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.onethefull.recipe.comm.ErrorCode;
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.comm.auth.User;
+import com.onethefull.recipe.req.AiRecipeDetailReq;
+import com.onethefull.recipe.req.RecipeIngrReq;
+import com.onethefull.recipe.req.RecipeSetReq;
+import com.onethefull.recipe.service.RecipeSetService;
+
+@Controller
+@RequestMapping("/rapi/rset")
+public class RecipeSetController extends BaseController {
+
+	@Resource(name = "recipeSetService")
+	private RecipeSetService rSetService;
+	
+	@RequestMapping(value = "/list", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getUserStuffOwningList(HttpServletRequest request, @RequestBody RecipeSetReq req) {
+		
+		User user = this.getUser(request);
+		
+		if (user == null || user.getId() == null || user.getId().isEmpty()) {
+			return ResultWithData.failuerResult().setCode(ErrorCode.NEED_LOGIN).setMessage("login is needed");
+		}
+		
+		req.setUserId(user.getId());
+
+		return rSetService.getRecipeSet(req);
+	}
+	
+	@RequestMapping(value = "/ingredients", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getRecipeIngr(HttpServletRequest request, @RequestBody RecipeIngrReq req) {
+		return rSetService.getRecipeIngr(req);
+	}
+	
+	@RequestMapping(value = "/aiRecipeDetail", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getAiRecipeDetail(HttpServletRequest request, @RequestBody AiRecipeDetailReq req) {
+		return rSetService.getAiRecipeDetail(req);
+	}
+	
+	@RequestMapping(value = "/phaseNlp", method = RequestMethod.POST)
+	@ResponseBody
+	public ResultWithData getPhaseNlp(HttpServletRequest request, @RequestBody AiRecipeDetailReq req) {
+		return rSetService.getAiRecipeDetail(req);
+	}
+}

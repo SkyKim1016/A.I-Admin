@@ -1,0 +1,21 @@
+<html> 
+<head> 
+<title></title> 
+<script language=javascript> 
+n = document.layers 
+ie = document.all 
+function hide() { 
+if (ie || n) { 
+if (n) document.Load.visibility = "hidden" 
+else Load.style.visibility = "hidden" 
+} 
+} 
+</script> 
+</head> 
+<body onload="hide()" bgcolor='white' text='black'> 
+<script language=javascript> 
+if(ie || n) document.write('<div id="Load" style="position:absolute;width:100%;height:100%;top:0;left:0;background-color:#ffffff;z-index:5">페이지 로딩중 보여줄 내용</div>') 
+</script> 
+본래 문서 
+</body> 
+</html> 

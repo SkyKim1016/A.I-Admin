@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.ExternalAPIMapper">
+	
+	<update id="registerWeather" parameterType="com.onethefull.recipe.req.ExternalWeatherReq" statementType="CALLABLE">
+		{ CALL  sp_external_api_weather(#{longitude}, #{latitude}, #{humidity}, #{temperature}, #{weatherInfo},  #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<select id="getWeatherInfo" parameterType="com.onethefull.recipe.req.ExternalWeatherReq" resultType="com.onethefull.recipe.vo.ExternalAPIWeatherVO">
+	
+		select w.humidity, w.temperature, w.id_weather, m.description_kor as description
+		from tbl_weather_history w
+		left join mst_weather m on w.id_weather = m.code
+		where w.longitude =  #{longitude} and w.latitude = #{latitude} 
+		order by w.reg_date desc
+		limit 0, 1
+	
+	</select>
+
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.UserAuthMapper">
+	<select id="getUserbyAuthToken" parameterType="com.onethefull.recipe.comm.auth.User" resultType="com.onethefull.recipe.comm.auth.User">
+			select b.id, b.loginId as loginId, b.userid as email, a.auth_token as authToken, b.name, b.gender, b.mobile, b.status
+			  from mst_user_auth_token a, 
+			       mst_user b
+			where a.id_user = b.id
+		 	and a.auth_token = #{authToken}
+	</select>
+	
+	<select id="findUserbyIdPassword" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE 1 = 1
+		 <if test="id != null and id != ''">
+		 	and id = #{id}
+		 </if>
+		 <if test="loginId != null and loginId != ''">
+		 	and loginId = #{loginId}
+		 </if>
+		 	and password = #{password}
+	</select>	
+		
+	<select id="findUserbyLoginId" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.comm.auth.User"> 
+		SELECT  id, name
+		  FROM mst_user
+		 WHERE loginId = #{loginId}
+	</select>	
+	
+	<select id="findUserbyProviderUserId" parameterType="com.onethefull.recipe.comm.social.UserSocialConnection" resultType="com.onethefull.recipe.comm.auth.User"> 
+		select id 
+		from mst_user_social_connect
+		where provider_id = #{providerId} and provider_user_id = #{providerUserId}
+	</select>	
+	
+	
+	<update id="setAuthToken" parameterType="com.onethefull.recipe.req.AuthTokenReq" statementType="CALLABLE">
+		{ CALL sp_user_auth_token_master(#{userId}, #{authToken}, #{tokenActionType}, #{resultCode, mode=OUT, jdbcType=NUMERIC}) }
+	</update>
+	
+	<update id="setUserDeviceInfo" parameterType="com.onethefull.recipe.req.UserDeviceReq" statementType="CALLABLE">
+		{ CALL  sp_user_device_register(#{userId}, #{deviceType}, #{token}, #{userId, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+    
+	<update id="setUserServiceProviderInfo" parameterType="com.onethefull.recipe.req.UserServiceProviderInfoReq" statementType="CALLABLE">
+		{ CALL  sp_user_social_connect_register(#{socialConnectionInfo.providerId}, #{socialConnectionInfo.providerUserId}, 
+		#{socialConnectionInfo.profileUrl}, #{socialConnectionInfo.imageUrl}, #{socialConnectionInfo.accessToken}, #{socialConnectionInfo.secret},
+		${socialConnectionInfo.expireTime}, #{userInfo.loginId}, #{userInfo.name}, #{userInfo.gender}, #{userInfo.email},  #{userInfo.password}, 
+		#{userInfo.mobile}, #{userInfo.id, mode=OUT, jdbcType=VARCHAR}, #{userInfo.status, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>	
+	
+	<update id="modifyFavoriteStep1" parameterType="com.onethefull.recipe.req.ModifyFavoriteStep1Req" statementType="CALLABLE">
+		{ CALL  sp_user_favorite_check_recipe(#{userId}, #{listInfo}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+	<select id="getCheckHealthList" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckHealthVO">  
+		select a.id, a.name, a.level, case when h.id is not null then 1 else 0 end as isSelected
+		from mst_check_health a
+		left join mst_user_check_health h on a.id = h.id_check_health and h.id_user = #{id}
+		where a.status = 'A'
+		order by a.level, a.priority
+	</select>		
+
+	<select id="getCheckJobList" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckJobVO">  
+		select a.id, a.name, case when h.id is not null then 1 else 0 end as isSelected
+		from mst_check_job a
+		left join mst_user_check_job h on a.id = h.id_check_job and h.id_user = #{id}
+		where a.status = 'A'
+		order by a.priority
+	</select>	
+	
+	<select id="getCheckActivityLevel" parameterType="com.onethefull.recipe.req.UserReq" resultType="com.onethefull.recipe.vo.CheckActivityVO">  
+		select a.activity_level as level
+		from mst_user_activitylevel a
+		where a.id_user = #{id}
+		
+	</select>	
+
+	<update id="modifyCheckHealth" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_health(#{id}, #{healthId}, #{selected, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+		
+	
+	<update id="modifyCheckJob" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_job(#{id}, #{jobId}, #{selected, mode=OUT, jdbcType=NUMERIC}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+	
+
+	<update id="modifyCheckActivityLevel" parameterType="com.onethefull.recipe.req.UserReq" statementType="CALLABLE">
+		{ CALL  sp_user_check_activitylevel(#{id}, ${activityLevel}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+	</update>
+		
+		
+</mapper>

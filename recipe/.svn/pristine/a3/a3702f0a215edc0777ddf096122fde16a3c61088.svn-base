@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+  "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" 
+  "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+	<!-- We declare a new template named template-main. This template is used 
+		for displaying the main page. It has 4 attributes. These attributes are placeholder 
+		for our contents For each attribute, we have assigned a corresponding JSP -->
+
+	<definition name="uploadrecipe" template="/WEB-INF/views/pages/upload_recipe.jsp"/>
+
+</tiles-definitions>

@@ -1,0 +1,100 @@
+package com.onethefull.recipe.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.onethefull.recipe.comm.ResultWithData;
+import com.onethefull.recipe.mapper.RcmdMapper;
+import com.onethefull.recipe.req.RcmdRecipeReq;
+import com.onethefull.recipe.req.UserMealReq;
+import com.onethefull.recipe.res.RcmdRecipe;
+import com.onethefull.recipe.vo.RcmdRecipeVO;
+import com.onethefull.recipe.vo.RcmdStuffOwningVO;
+import com.onethefull.recipe.vo.RcmdStuffPMIVO;
+import com.onethefull.recipe.vo.RcmdStuffVO;
+import com.onethefull.recipe.vo.RecipeStuffVO;
+import com.onethefull.recipe.vo.StatisticMealofUserVO;
+
+@Service("recipeRcmdService")
+public class RecipeRcmdService {
+	
+	@Resource(name = "rcmdMapper")
+	private RcmdMapper rcmdMapper;
+	
+	public ResultWithData getRcmdStuffPMI(RcmdRecipeReq rcmdRecipeReq) {
+		
+		// 사용자의 식자재 목록
+		List<RcmdStuffOwningVO> userStufflist = rcmdMapper.getUserStuffs(rcmdRecipeReq);
+		if(!userStufflist.isEmpty()) {
+			
+		}
+		
+		List<RcmdStuffPMIVO> stuffList = null;
+		rcmdRecipeReq.seperateIds();
+		switch (rcmdRecipeReq.getStuffCount()) {
+		case 1 : stuffList = rcmdMapper.getStuffsPMI1Var(rcmdRecipeReq); break;
+		case 2 : stuffList = rcmdMapper.getStuffsPMI2Var(rcmdRecipeReq); break;
+		case 3 : stuffList = rcmdMapper.getStuffsPMI3Var(rcmdRecipeReq); break;
+		case 4 : stuffList = rcmdMapper.getStuffsPMI4Var(rcmdRecipeReq); break;
+		}
+		
+		this.checkStuffHaving(userStufflist, stuffList);
+	
+		return ResultWithData.succcessResult().addData("list", stuffList);
+	}
+	
+	private void checkStuffHaving(List<RcmdStuffOwningVO> userStufflist, List<RcmdStuffPMIVO> stuffList) {
+		if(stuffList == null || stuffList.isEmpty()) return;
+		
+		ArrayList<String> userStuffArray = new ArrayList<String>();
+		
+		for(RcmdStuffVO userStuff : userStufflist) {
+			userStuffArray.add(userStuff.getStuffId());
+		}
+		
+		for(RcmdStuffPMIVO stuff : stuffList) {
+			stuff.setStuffOwning1(userStuffArray.contains(stuff.getStuffId1()));
+			stuff.setStuffOwning2(userStuffArray.contains(stuff.getStuffId2()));
+			stuff.setStuffOwning3(userStuffArray.contains(stuff.getStuffId3()));
+			stuff.setStuffOwning4(userStuffArray.contains(stuff.getStuffId4()));
+		}
+		return;
+	}
+
+	public ResultWithData getRcmdRecipe(RcmdRecipeReq req) {
+		List<RcmdRecipeVO> list = rcmdMapper.getRecommendRecipies(req);
+		List<RcmdRecipe> recipeList = new ArrayList<RcmdRecipe>();
+		
+		if(list != null && !list.isEmpty()) {
+			for(RcmdRecipeVO recipe : list) {
+		
+				RcmdRecipe rr = new RcmdRecipe();			
+				rr.setRecipeId(recipe.getRecipeId());
+				rr.setRecipeName(recipe.getRecipeName());
+				rr.setCategoryName(recipe.getCategoryName());
+				
+				if(req.getUserId() != null) {
+					StatisticMealofUserVO statisticInfo = rcmdMapper.getStatisticMealofUser(new UserMealReq(req.getUserId(), recipe.getRecipeId()));
+					rr.setStatisticInfo(statisticInfo);
+				}
+				recipeList.add(rr);
+			}
+		}
+
+		return ResultWithData.succcessResult().addData("list", recipeList);
+	}
+
+	public ResultWithData getUserStuffOwningList(RcmdRecipeReq req) {
+		List<RcmdStuffOwningVO> userStufflist = rcmdMapper.getUserStuffs(req);
+		return ResultWithData.succcessResult().addData("list", userStufflist);
+	}
+
+	public ResultWithData getRcmdRecipeList(RcmdRecipeReq req) {
+		List<RecipeStuffVO> recipeLists = rcmdMapper.getStuffsofRecipe(req);
+		return ResultWithData.succcessResult().addData("list", recipeLists);
+	}
+}

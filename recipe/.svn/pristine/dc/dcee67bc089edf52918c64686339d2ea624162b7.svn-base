@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.onethefull.recipe.mapper.RecipeSetMapper">
+	<select id="getRecipeSet" parameterType="com.onethefull.recipe.req.RecipeSetReq" resultType="com.onethefull.recipe.vo.RecipeSetVO">  
+		
+		<!-- 파라미터는 유저ID로 쿼리 작성 필요 -->
+		select mt.id_recipe as recipeId, r.name as recipeName, mt.id_stuff as stuffId, s.name as stuffName
+		from mst_recipe_stuff_mt mt
+		join mst_recipe r on mt.id_recipe = r.id
+		join mst_stuff s on mt.id_stuff = s.id
+		where 1 = 1
+		<if test="userId !=null and userId != ''">
+			and mt.id_recipe = #{userId}
+		</if>
+
+	</select>
+	<select id="getRecipeIngr" parameterType="com.onethefull.recipe.req.RecipeIngrReq" resultType="com.onethefull.recipe.vo.RecipeIngrVO">  
+		select id_user as userId, seq ingredientId, ingriName ingredientName, '' ingredientQnt from tbl_fridge_ingr
+		where 1 = 1
+		<if test="userId !=null and userId != ''">
+			and userId = #{userId}
+		</if>
+
+	</select>
+	
+	<select id="getAiRecipeDetail" parameterType="com.onethefull.recipe.req.AiRecipeDetailReq" resultType="com.onethefull.recipe.vo.AiRecipeDetailVO">  
+		<!-- 파라미터는 유저ID, 레시피ID로 쿼리 작성 필요 -->
+		select mt.id_recipe as recipeId, r.name as recipeName, mt.id_stuff as stuffId, s.name as stuffName
+		from mst_recipe_stuff_mt mt
+		join mst_recipe r on mt.id_recipe = r.id
+		join mst_stuff s on mt.id_stuff = s.id
+		where 1 = 1
+		<if test="recipeId !=null and recipeId != ''">
+			and mt.id_recipe = #{recipeId}
+		</if>
+
+	</select>
+	
+	<update id="insertRecipeMaster" parameterType="com.onethefull.recipe.req.RecipeMasterReq" statementType="CALLABLE">
+		<if test="recipeId !=null and recipeId != ''">
+			{ CALL  sp_recipe_master(#{recipeId}, #{categoryName}, #{recipeName}, ${cookingTime},  ${calorie},  #{imageUrl},  #{referedUrl},  #{storageInfo},  #{memo}, ${cookDifficulty}, #{checkInfo}, 'I', #{recipeId, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+		</if>
+		<if test="recipeId == null or  recipeId == ''">
+			{ CALL  sp_recipe_master(null, #{categoryName}, #{recipeName}, ${cookingTime},  ${calorie},  #{imageUrl},  #{referedUrl},  #{storageInfo},  #{memo}, ${cookDifficulty}, #{checkInfo}, 'I', #{recipeId, mode=OUT, jdbcType=VARCHAR}, #{resultCode, mode=OUT, jdbcType=NUMERIC})}
+		</if>
+		
+	</update>
+	
+	<select id="getBaseRecipes" parameterType="com.onethefull.recipe.req.AiRecipeDetailReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+	
+		select distinct sim.id as recipeId /* sim.sim */ 
+		from mst_recipe sim 
+		join mst_recipe_stuff_mt s on sim.id = s.id_recipe 
+		where 1 = 1
+		<if test="!emptyStuffIds">
+			<foreach collection="stuffIds" item="stuffId" open=" and s.id_stuff in (" separator=" , " close=")">
+				#{stuffId}
+			</foreach>
+		</if>
+		limit 0, 20
+		
+	</select>	
+	
+	<select id="getBaseRecipes_old" parameterType="com.onethefull.recipe.req.AiRecipeDetailReq" resultType="com.onethefull.recipe.vo.RcmdRecipeVO">  
+	
+		select sim.id_recipe as recipeId /* sim.sim */
+		from tbl_user_recipe_sim sim
+		join mst_recipe_stuff_mt s on sim.id_recipe = s.id_recipe
+		where sim.id_user = #{userId}
+		<if test="!emptyStuffIds">
+			<foreach collection="stuffIds" item="stuffId" open=" and s.id_stuff in (" separator=" , " close=")">
+				#{stuffId}
+			</foreach>
+		</if>
+		group by sim.id_recipe, sim.sim
+		order by sim.sim desc
+		limit 0, 20
+		
+	</select>
+	
+</mapper>

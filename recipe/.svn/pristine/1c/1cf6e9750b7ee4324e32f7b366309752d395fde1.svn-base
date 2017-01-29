@@ -1,0 +1,52 @@
+package com.onethefull.recipe.req;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.onethefull.recipe.vo.RecipeforFavoriteCheckVO;
+
+public class ModifyFavoriteStep1Req {
+	private String userId;
+	private List<RecipeforFavoriteCheckVO> lists;
+	private int resultCode;
+	
+	public ModifyFavoriteStep1Req(){}
+	
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public List<RecipeforFavoriteCheckVO> getLists() {
+		return lists;
+	}
+
+	public void setLists(List<RecipeforFavoriteCheckVO> lists) {
+		this.lists = lists;
+	}
+	
+	@JsonIgnore
+	public String getListInfo() {
+		if(lists == null || lists.isEmpty()) return null;
+		
+		String info = "";
+		
+		for(RecipeforFavoriteCheckVO unit : lists) {
+			info += (!info.equals("")? ";" : "") + unit.getId() + ":" + unit.getPriority();
+		}
+		
+		return info;
+	}
+
+	public int getResultCode() {
+		return resultCode;
+	}
+
+	public void setResultCode(int resultCode) {
+		this.resultCode = resultCode;
+	}	
+
+}
